@@ -12,7 +12,7 @@ import java.sql.Statement;
 import java.sql.Types;
 
 import com.j256.ormlite.dao.ObjectCache;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.misc.IOUtils;
 import com.j256.ormlite.stmt.GenericRowMapper;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
@@ -82,7 +82,7 @@ public class H2DatabaseConnection implements DatabaseConnection {
 	}
 
 	@Override
-	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
+	public CompiledStatement compileStatement(String statement, StatementType type, DbField[] argDbFields,
 			int resultFlags, boolean cacheStore) throws SQLException {
 		PreparedStatement stmt;
 		if (resultFlags == DatabaseConnection.DEFAULT_RESULT_FLAGS) {
@@ -94,7 +94,7 @@ public class H2DatabaseConnection implements DatabaseConnection {
 	}
 
 	@Override
-	public int insert(String statement, Object[] args, FieldType[] argFieldTypes, GeneratedKeyHolder keyHolder)
+	public int insert(String statement, Object[] args, DbField[] argDbFields, GeneratedKeyHolder keyHolder)
 			throws SQLException {
 		PreparedStatement stmt;
 		if (keyHolder == null) {
@@ -102,7 +102,7 @@ public class H2DatabaseConnection implements DatabaseConnection {
 		} else {
 			stmt = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
 		}
-		statementSetArgs(stmt, args, argFieldTypes);
+		statementSetArgs(stmt, args, argDbFields);
 		int rowN = stmt.executeUpdate();
 		if (keyHolder != null) {
 			ResultSet resultSet = stmt.getGeneratedKeys();
@@ -120,24 +120,24 @@ public class H2DatabaseConnection implements DatabaseConnection {
 	}
 
 	@Override
-	public int update(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
+	public int update(String statement, Object[] args, DbField[] argDbFields) throws SQLException {
 		PreparedStatement stmt = connection.prepareStatement(statement);
-		statementSetArgs(stmt, args, argFieldTypes);
+		statementSetArgs(stmt, args, argDbFields);
 		return stmt.executeUpdate();
 	}
 
 	@Override
-	public int delete(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
-		return update(statement, args, argFieldTypes);
+	public int delete(String statement, Object[] args, DbField[] argDbFields) throws SQLException {
+		return update(statement, args, argDbFields);
 	}
 
 	@Override
-	public <T> Object queryForOne(String statement, Object[] args, FieldType[] argFieldTypes,
+	public <T> Object queryForOne(String statement, Object[] args, DbField[] argDbFields,
 			GenericRowMapper<T> rowMapper, ObjectCache objectCache) throws SQLException {
 		PreparedStatement stmt =
 				connection.prepareStatement(statement, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 		if (args != null) {
-			statementSetArgs(stmt, args, argFieldTypes);
+			statementSetArgs(stmt, args, argDbFields);
 		}
 		DatabaseResults results = new H2DatabaseResults(stmt.executeQuery(), objectCache, true);
 		if (!results.next()) {
@@ -155,13 +155,13 @@ public class H2DatabaseConnection implements DatabaseConnection {
 
 	@Override
 	public long queryForLong(String statement) throws SQLException {
-		return queryForLong(statement, new Object[0], new FieldType[0]);
+		return queryForLong(statement, new Object[0], new DbField[0]);
 	}
 
 	@Override
-	public long queryForLong(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
+	public long queryForLong(String statement, Object[] args, DbField[] argDbFields) throws SQLException {
 		// don't care about the object cache here
-		Object result = queryForOne(statement, args, argFieldTypes, longWrapper, null);
+		Object result = queryForOne(statement, args, argDbFields, longWrapper, null);
 		if (result == null) {
 			throw new SQLException("No results returned in query-for-long: " + statement);
 		} else if (result == MORE_THAN_ONE) {
@@ -233,10 +233,10 @@ public class H2DatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	private void statementSetArgs(PreparedStatement stmt, Object[] args, FieldType[] argFieldTypes) throws SQLException {
+	private void statementSetArgs(PreparedStatement stmt, Object[] args, DbField[] argDbFields) throws SQLException {
 		for (int i = 0; i < args.length; i++) {
 			Object arg = args[i];
-			int typeVal = H2CompiledStatement.sqlTypeToJdbcInt(argFieldTypes[i].getSqlType());
+			int typeVal = H2CompiledStatement.sqlTypeToJdbcInt(argDbFields[i].getSqlType());
 			if (arg == null) {
 				stmt.setNull(i + 1, typeVal);
 			} else {

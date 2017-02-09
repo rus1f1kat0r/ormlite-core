@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 
 import com.j256.ormlite.dao.ObjectCache;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.stmt.GenericRowMapper;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 
@@ -86,50 +86,50 @@ public class DatabaseConnectionProxy implements DatabaseConnection {
 	}
 
 	@Override
-	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
+	public CompiledStatement compileStatement(String statement, StatementType type, DbField[] argDbFields,
 			int resultFlags, boolean cacheStore) throws SQLException {
 		if (proxy == null) {
 			return null;
 		} else {
-			return proxy.compileStatement(statement, type, argFieldTypes, resultFlags, cacheStore);
+			return proxy.compileStatement(statement, type, argDbFields, resultFlags, cacheStore);
 		}
 	}
 
 	@Override
-	public int insert(String statement, Object[] args, FieldType[] argfieldTypes, GeneratedKeyHolder keyHolder)
+	public int insert(String statement, Object[] args, DbField[] argfieldDbs, GeneratedKeyHolder keyHolder)
 			throws SQLException {
 		if (proxy == null) {
 			return 0;
 		} else {
-			return proxy.insert(statement, args, argfieldTypes, keyHolder);
+			return proxy.insert(statement, args, argfieldDbs, keyHolder);
 		}
 	}
 
 	@Override
-	public int update(String statement, Object[] args, FieldType[] argfieldTypes) throws SQLException {
+	public int update(String statement, Object[] args, DbField[] argfieldDbs) throws SQLException {
 		if (proxy == null) {
 			return 0;
 		} else {
-			return proxy.update(statement, args, argfieldTypes);
+			return proxy.update(statement, args, argfieldDbs);
 		}
 	}
 
 	@Override
-	public int delete(String statement, Object[] args, FieldType[] argfieldTypes) throws SQLException {
+	public int delete(String statement, Object[] args, DbField[] argfieldDbs) throws SQLException {
 		if (proxy == null) {
 			return 0;
 		} else {
-			return proxy.delete(statement, args, argfieldTypes);
+			return proxy.delete(statement, args, argfieldDbs);
 		}
 	}
 
 	@Override
-	public <T> Object queryForOne(String statement, Object[] args, FieldType[] argfieldTypes,
+	public <T> Object queryForOne(String statement, Object[] args, DbField[] argfieldDbs,
 			GenericRowMapper<T> rowMapper, ObjectCache objectCache) throws SQLException {
 		if (proxy == null) {
 			return null;
 		} else {
-			return proxy.queryForOne(statement, args, argfieldTypes, rowMapper, objectCache);
+			return proxy.queryForOne(statement, args, argfieldDbs, rowMapper, objectCache);
 		}
 	}
 
@@ -143,11 +143,11 @@ public class DatabaseConnectionProxy implements DatabaseConnection {
 	}
 
 	@Override
-	public long queryForLong(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
+	public long queryForLong(String statement, Object[] args, DbField[] argDbFields) throws SQLException {
 		if (proxy == null) {
 			return 0;
 		} else {
-			return proxy.queryForLong(statement, args, argFieldTypes);
+			return proxy.queryForLong(statement, args, argDbFields);
 		}
 	}
 

@@ -17,6 +17,7 @@ import com.j256.ormlite.BaseCoreTest;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DataPersister;
 import com.j256.ormlite.field.DataType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
@@ -26,7 +27,7 @@ import com.j256.ormlite.support.DatabaseResults;
 public abstract class BaseTypeTest extends BaseCoreTest {
 
 	protected static final String TABLE_NAME = "foo";
-	protected static final FieldType[] noFieldTypes = new FieldType[0];
+	protected static final DbField[] NO_DB_FIELDs = new DbField[0];
 
 	protected <T, ID> void testType(Dao<T, ID> dao, T foo, Class<T> clazz, Object javaVal, Object defaultSqlVal,
 			Object sqlArg, String defaultValStr, DataType dataType, String columnName, boolean isValidGeneratedType,
@@ -39,37 +40,37 @@ public abstract class BaseTypeTest extends BaseCoreTest {
 			assertEquals(defaultSqlVal.getClass(), sqlArg.getClass());
 		}
 		try {
-			stmt = conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, noFieldTypes,
+			stmt = conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, NO_DB_FIELDs,
 					DatabaseConnection.DEFAULT_RESULT_FLAGS, true);
 			DatabaseResults results = stmt.runQuery(null);
 			assertTrue(results.next());
 			int colNum = results.findColumn(columnName);
 			Field field = clazz.getDeclaredField(columnName);
-			FieldType fieldType = FieldType.createFieldType(connectionSource, TABLE_NAME, field, clazz);
-			assertEquals(dataType.getDataPersister(), fieldType.getDataPersister());
-			Class<?>[] classes = fieldType.getDataPersister().getAssociatedClasses();
+			DbField dbField = FieldType.createFieldType(connectionSource, TABLE_NAME, field, clazz);
+			assertEquals(dataType.getDataPersister(), dbField.getDataPersister());
+			Class<?>[] classes = dbField.getDataPersister().getAssociatedClasses();
 			if (classes.length > 0) {
-				assertTrue(classes[0].isAssignableFrom(fieldType.getType()));
+				assertTrue(classes[0].isAssignableFrom(dbField.getType()));
 			}
-			assertTrue(fieldType.getDataPersister().isValidForField(field));
+			assertTrue(dbField.getDataPersister().isValidForField(field));
 			if (javaVal instanceof byte[]) {
 				assertTrue(Arrays.equals((byte[]) javaVal,
-						(byte[]) dataPersister.resultToJava(fieldType, results, colNum)));
+						(byte[]) dataPersister.resultToJava(dbField, results, colNum)));
 			} else {
 				Map<String, Integer> colMap = new HashMap<String, Integer>();
 				colMap.put(columnName, colNum);
-				Object result = fieldType.resultToJava(results, colMap);
+				Object result = dbField.resultToJava(results, colMap);
 				assertEquals(javaVal, result);
 			}
 			if (dataType == DataType.SERIALIZABLE) {
 				try {
-					dataPersister.parseDefaultString(fieldType, "");
+					dataPersister.parseDefaultString(dbField, "");
 					fail("parseDefaultString should have thrown for " + dataType);
 				} catch (SQLException e) {
 					// expected
 				}
 			} else if (defaultValStr != null) {
-				Object parsedDefault = dataPersister.parseDefaultString(fieldType, defaultValStr);
+				Object parsedDefault = dataPersister.parseDefaultString(dbField, defaultValStr);
 				assertEquals(defaultSqlVal.getClass(), parsedDefault.getClass());
 				if (dataType == DataType.BYTE_ARRAY || dataType == DataType.STRING_BYTES) {
 					assertTrue(Arrays.equals((byte[]) defaultSqlVal, (byte[]) parsedDefault));
@@ -80,9 +81,9 @@ public abstract class BaseTypeTest extends BaseCoreTest {
 			if (sqlArg == null) {
 				// noop
 			} else if (sqlArg instanceof byte[]) {
-				assertTrue(Arrays.equals((byte[]) sqlArg, (byte[]) dataPersister.javaToSqlArg(fieldType, javaVal)));
+				assertTrue(Arrays.equals((byte[]) sqlArg, (byte[]) dataPersister.javaToSqlArg(dbField, javaVal)));
 			} else {
-				assertEquals(sqlArg, dataPersister.javaToSqlArg(fieldType, javaVal));
+				assertEquals(sqlArg, dataPersister.javaToSqlArg(dbField, javaVal));
 			}
 			assertEquals(isValidGeneratedType, dataPersister.isValidGeneratedType());
 			assertEquals(isAppropriateId, dataPersister.isAppropriateId());
@@ -118,7 +119,7 @@ public abstract class BaseTypeTest extends BaseCoreTest {
 			} else {
 				// test string conversion
 				String stringVal = results.getString(colNum);
-				Object convertedJavaVal = fieldType.convertStringToJavaField(stringVal, 0);
+				Object convertedJavaVal = dbField.convertStringToJavaField(stringVal, 0);
 				assertEquals(javaVal, convertedJavaVal);
 			}
 		} finally {

@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.j256.ormlite.BaseCoreTest;
 import com.j256.ormlite.field.DataType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 
 public class BaseSqliteDatabaseTypeTest extends BaseCoreTest {
@@ -19,20 +20,20 @@ public class BaseSqliteDatabaseTypeTest extends BaseCoreTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConfigureGeneratedIdNotInteger() throws Exception {
 		Field field = Foo.class.getField("stringField");
-		FieldType fieldType = FieldType.createFieldType(connectionSource, "foo", field, Foo.class);
+		DbField dbField = FieldType.createFieldType(connectionSource, "foo", field, Foo.class);
 		OurSqliteDatabaseType dbType = new OurSqliteDatabaseType();
 		StringBuilder sb = new StringBuilder();
-		dbType.configureGeneratedId(null, sb, fieldType, new ArrayList<String>(), null, new ArrayList<String>(),
+		dbType.configureGeneratedId(null, sb, dbField, new ArrayList<String>(), null, new ArrayList<String>(),
 				new ArrayList<String>());
 	}
 
 	@Test
 	public void testConfigureGeneratedIdInteger() throws Exception {
 		Field field = Foo.class.getField("val");
-		FieldType fieldType = FieldType.createFieldType(connectionSource, "foo", field, Foo.class);
+		DbField dbField = FieldType.createFieldType(connectionSource, "foo", field, Foo.class);
 		OurSqliteDatabaseType dbType = new OurSqliteDatabaseType();
 		StringBuilder sb = new StringBuilder();
-		dbType.configureGeneratedId(null, sb, fieldType, new ArrayList<String>(), null, new ArrayList<String>(),
+		dbType.configureGeneratedId(null, sb, dbField, new ArrayList<String>(), null, new ArrayList<String>(),
 				new ArrayList<String>());
 		assertTrue(sb.toString().contains("PRIMARY KEY AUTOINCREMENT"));
 	}

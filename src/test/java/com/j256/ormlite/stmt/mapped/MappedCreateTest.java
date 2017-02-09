@@ -25,6 +25,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.db.BaseDatabaseType;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.BaseCoreStmtTest;
 import com.j256.ormlite.stmt.StatementExecutor;
@@ -44,7 +45,7 @@ public class MappedCreateTest extends BaseCoreStmtTest {
 		StatementExecutor<GeneratedId, Integer> se =
 				new StatementExecutor<GeneratedId, Integer>(databaseType, tableInfo, null);
 		DatabaseConnection databaseConnection = createMock(DatabaseConnection.class);
-		databaseConnection.insert(isA(String.class), isA(Object[].class), isA(FieldType[].class),
+		databaseConnection.insert(isA(String.class), isA(Object[].class), isA(DbField[].class),
 				isA(GeneratedKeyHolder.class));
 		expectLastCall().andAnswer(new IAnswer<Object>() {
 			@Override
@@ -71,7 +72,7 @@ public class MappedCreateTest extends BaseCoreStmtTest {
 		DatabaseConnection databaseConnection = createMock(DatabaseConnection.class);
 		expect(databaseConnection.queryForLong(isA(String.class))).andReturn(1L);
 		expect(
-				databaseConnection.insert(isA(String.class), isA(Object[].class), isA(FieldType[].class),
+				databaseConnection.insert(isA(String.class), isA(Object[].class), isA(DbField[].class),
 						(GeneratedKeyHolder) isNull())).andReturn(1);
 
 		replay(databaseConnection);
@@ -90,7 +91,7 @@ public class MappedCreateTest extends BaseCoreStmtTest {
 		DatabaseConnection databaseConnection = createMock(DatabaseConnection.class);
 		expect(databaseConnection.queryForLong(isA(String.class))).andReturn(1L);
 		expect(
-				databaseConnection.insert(isA(String.class), isA(Object[].class), isA(FieldType[].class),
+				databaseConnection.insert(isA(String.class), isA(Object[].class), isA(DbField[].class),
 						(GeneratedKeyHolder) isNull())).andReturn(1);
 
 		replay(databaseConnection);
@@ -273,7 +274,7 @@ public class MappedCreateTest extends BaseCoreStmtTest {
 		MappedCreate<Foo, Integer> mappedCreate = MappedCreate.build(databaseType, tableInfo);
 		DatabaseConnection conn = createMock(DatabaseConnection.class);
 		expect(
-				conn.insert(isA(String.class), isA(Object[].class), isA(FieldType[].class),
+				conn.insert(isA(String.class), isA(Object[].class), isA(DbField[].class),
 						isA(GeneratedKeyHolder.class))).andAnswer(new IAnswer<Integer>() {
 			@Override
 			public Integer answer() throws Throwable {
@@ -293,7 +294,7 @@ public class MappedCreateTest extends BaseCoreStmtTest {
 		MappedCreate<Foo, Integer> mappedCreate = MappedCreate.build(databaseType, tableInfo);
 		DatabaseConnection conn = createMock(DatabaseConnection.class);
 		expect(
-				conn.insert(isA(String.class), isA(Object[].class), isA(FieldType[].class),
+				conn.insert(isA(String.class), isA(Object[].class), isA(DbField[].class),
 						isA(GeneratedKeyHolder.class))).andAnswer(new IAnswer<Integer>() {
 			@Override
 			public Integer answer() throws Throwable {
@@ -312,7 +313,7 @@ public class MappedCreateTest extends BaseCoreStmtTest {
 		MappedCreate<Foo, Integer> mappedCreate = MappedCreate.build(databaseType, tableInfo);
 		DatabaseConnection conn = createMock(DatabaseConnection.class);
 		expect(
-				conn.insert(isA(String.class), isA(Object[].class), isA(FieldType[].class),
+				conn.insert(isA(String.class), isA(Object[].class), isA(DbField[].class),
 						isA(GeneratedKeyHolder.class))).andReturn(1);
 		replay(conn);
 		mappedCreate.insert(databaseType, conn, new Foo(), null);

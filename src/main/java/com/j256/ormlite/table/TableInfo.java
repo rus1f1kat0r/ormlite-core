@@ -9,6 +9,7 @@ import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.misc.BaseDaoEnabled;
 import com.j256.ormlite.misc.SqlExceptionUtil;
@@ -26,17 +27,17 @@ import com.j256.ormlite.support.ConnectionSource;
  */
 public class TableInfo<T, ID> {
 
-	private static final FieldType[] NO_FOREIGN_COLLECTIONS = new FieldType[0];
+	private static final DbField[] NO_FOREIGN_COLLECTIONS = new DbField[0];
 
 	private final BaseDaoImpl<T, ID> baseDaoImpl;
 	private final Class<T> dataClass;
 	private final String tableName;
-	private final FieldType[] fieldTypes;
-	private final FieldType[] foreignCollections;
-	private final FieldType idField;
+	private final DbField[] fieldTypes;
+	private final DbField[] foreignCollections;
+	private final DbField idField;
 	private final Constructor<T> constructor;
 	private final boolean foreignAutoCreate;
-	private Map<String, FieldType> fieldNameMap;
+	private Map<String, DbField> fieldNameMap;
 
 	/**
 	 * Creates a holder of information about a table/class.
@@ -71,36 +72,36 @@ public class TableInfo<T, ID> {
 		this.tableName = tableConfig.getTableName();
 		this.fieldTypes = tableConfig.getFieldTypes(databaseType);
 		// find the id field
-		FieldType findIdFieldType = null;
+		DbField findIdDbField = null;
 		boolean foreignAutoCreate = false;
 		int foreignCollectionCount = 0;
-		for (FieldType fieldType : fieldTypes) {
-			if (fieldType.isId() || fieldType.isGeneratedId() || fieldType.isGeneratedIdSequence()) {
-				if (findIdFieldType != null) {
+		for (DbField dbField : fieldTypes) {
+			if (dbField.isId() || dbField.isGeneratedId() || dbField.isGeneratedIdSequence()) {
+				if (findIdDbField != null) {
 					throw new SQLException("More than 1 idField configured for class " + dataClass + " ("
-							+ findIdFieldType + "," + fieldType + ")");
+							+ findIdDbField + "," + dbField + ")");
 				}
-				findIdFieldType = fieldType;
+				findIdDbField = dbField;
 			}
-			if (fieldType.isForeignAutoCreate()) {
+			if (dbField.isForeignAutoCreate()) {
 				foreignAutoCreate = true;
 			}
-			if (fieldType.isForeignCollection()) {
+			if (dbField.isForeignCollection()) {
 				foreignCollectionCount++;
 			}
 		}
 		// can be null if there is no id field
-		this.idField = findIdFieldType;
+		this.idField = findIdDbField;
 		this.constructor = tableConfig.getConstructor();
 		this.foreignAutoCreate = foreignAutoCreate;
 		if (foreignCollectionCount == 0) {
 			this.foreignCollections = NO_FOREIGN_COLLECTIONS;
 		} else {
-			this.foreignCollections = new FieldType[foreignCollectionCount];
+			this.foreignCollections = new DbField[foreignCollectionCount];
 			foreignCollectionCount = 0;
-			for (FieldType fieldType : fieldTypes) {
-				if (fieldType.isForeignCollection()) {
-					this.foreignCollections[foreignCollectionCount] = fieldType;
+			for (DbField dbField : fieldTypes) {
+				if (dbField.isForeignCollection()) {
+					this.foreignCollections[foreignCollectionCount] = dbField;
 					foreignCollectionCount++;
 				}
 			}
@@ -124,32 +125,32 @@ public class TableInfo<T, ID> {
 	/**
 	 * Return the array of field types associated with the object.
 	 */
-	public FieldType[] getFieldTypes() {
+	public DbField[] getFieldTypes() {
 		return fieldTypes;
 	}
 
 	/**
 	 * Return the {@link FieldType} associated with the columnName.
 	 */
-	public FieldType getFieldTypeByColumnName(String columnName) {
+	public DbField getFieldTypeByColumnName(String columnName) {
 		if (fieldNameMap == null) {
 			// build our alias map if we need it
-			Map<String, FieldType> map = new HashMap<String, FieldType>();
-			for (FieldType fieldType : fieldTypes) {
-				map.put(fieldType.getColumnName().toLowerCase(), fieldType);
+			Map<String, DbField> map = new HashMap<String, DbField>();
+			for (DbField dbField : fieldTypes) {
+				map.put(dbField.getColumnName().toLowerCase(), dbField);
 			}
 			fieldNameMap = map;
 		}
-		FieldType fieldType = fieldNameMap.get(columnName.toLowerCase());
+		DbField dbField = fieldNameMap.get(columnName.toLowerCase());
 		// if column name is found, return it
-		if (fieldType != null) {
-			return fieldType;
+		if (dbField != null) {
+			return dbField;
 		}
 		// look to see if someone is using the field-name instead of column-name
-		for (FieldType fieldType2 : fieldTypes) {
-			if (fieldType2.getFieldName().equals(columnName)) {
-				throw new IllegalArgumentException("You should use columnName '" + fieldType2.getColumnName()
-						+ "' for table " + tableName + " instead of fieldName '" + fieldType2.getFieldName() + "'");
+		for (DbField dbField2 : fieldTypes) {
+			if (dbField2.getFieldName().equals(columnName)) {
+				throw new IllegalArgumentException("You should use columnName '" + dbField2.getColumnName()
+						+ "' for table " + tableName + " instead of fieldName '" + dbField2.getFieldName() + "'");
 			}
 		}
 		throw new IllegalArgumentException("Unknown column name '" + columnName + "' in table " + tableName);
@@ -158,7 +159,7 @@ public class TableInfo<T, ID> {
 	/**
 	 * Return the id-field associated with the object.
 	 */
-	public FieldType getIdField() {
+	public DbField getIdField() {
 		return idField;
 	}
 
@@ -172,12 +173,12 @@ public class TableInfo<T, ID> {
 	public String objectToString(T object) {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append(object.getClass().getSimpleName());
-		for (FieldType fieldType : fieldTypes) {
-			sb.append(' ').append(fieldType.getColumnName()).append('=');
+		for (DbField dbField : fieldTypes) {
+			sb.append(' ').append(dbField.getColumnName()).append('=');
 			try {
-				sb.append(fieldType.extractJavaFieldValue(object));
+				sb.append(dbField.extractJavaFieldValue(object));
 			} catch (Exception e) {
-				throw new IllegalStateException("Could not generate toString of field " + fieldType, e);
+				throw new IllegalStateException("Could not generate toString of field " + dbField, e);
 			}
 		}
 		return sb.toString();
@@ -223,7 +224,7 @@ public class TableInfo<T, ID> {
 	/**
 	 * Return an array with the fields that are {@link ForeignCollection}s or a blank array if none.
 	 */
-	public FieldType[] getForeignCollections() {
+	public DbField[] getForeignCollections() {
 		return foreignCollections;
 	}
 
@@ -232,8 +233,8 @@ public class TableInfo<T, ID> {
 	 * {@link DatabaseField#columnName()} or the field name if not set.
 	 */
 	public boolean hasColumnName(String columnName) {
-		for (FieldType fieldType : fieldTypes) {
-			if (fieldType.getColumnName().equals(columnName)) {
+		for (DbField dbField : fieldTypes) {
+			if (dbField.getColumnName().equals(columnName)) {
 				return true;
 			}
 		}

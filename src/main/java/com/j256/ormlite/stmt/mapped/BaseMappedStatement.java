@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.table.TableInfo;
@@ -20,33 +20,33 @@ public abstract class BaseMappedStatement<T, ID> {
 
 	protected final TableInfo<T, ID> tableInfo;
 	protected final Class<T> clazz;
-	protected final FieldType idField;
+	protected final DbField idField;
 	protected final String statement;
-	protected final FieldType[] argFieldTypes;
+	protected final DbField[] argDbFields;
 
-	protected BaseMappedStatement(TableInfo<T, ID> tableInfo, String statement, FieldType[] argFieldTypes) {
+	protected BaseMappedStatement(TableInfo<T, ID> tableInfo, String statement, DbField[] argDbFields) {
 		this.tableInfo = tableInfo;
 		this.clazz = tableInfo.getDataClass();
 		this.idField = tableInfo.getIdField();
 		this.statement = statement;
-		this.argFieldTypes = argFieldTypes;
+		this.argDbFields = argDbFields;
 	}
 
 	/**
 	 * Return the array of field objects pulled from the data object.
 	 */
 	protected Object[] getFieldObjects(Object data) throws SQLException {
-		Object[] objects = new Object[argFieldTypes.length];
-		for (int i = 0; i < argFieldTypes.length; i++) {
-			FieldType fieldType = argFieldTypes[i];
-			if (fieldType.isAllowGeneratedIdInsert()) {
-				objects[i] = fieldType.getFieldValueIfNotDefault(data);
+		Object[] objects = new Object[argDbFields.length];
+		for (int i = 0; i < argDbFields.length; i++) {
+			DbField dbField = argDbFields[i];
+			if (dbField.isAllowGeneratedIdInsert()) {
+				objects[i] = dbField.getFieldValueIfNotDefault(data);
 			} else {
-				objects[i] = fieldType.extractJavaFieldToSqlArgValue(data);
+				objects[i] = dbField.extractJavaFieldToSqlArgValue(data);
 			}
 			if (objects[i] == null) {
 				// NOTE: the default value could be null as well
-				objects[i] = fieldType.getDefaultValue();
+				objects[i] = dbField.getDefaultValue();
 			}
 		}
 		return objects;
@@ -59,10 +59,10 @@ public abstract class BaseMappedStatement<T, ID> {
 		return idField.convertJavaFieldToSqlArgValue(id);
 	}
 
-	static void appendWhereFieldEq(DatabaseType databaseType, FieldType fieldType, StringBuilder sb,
-			List<FieldType> fieldTypeList) {
+	static void appendWhereFieldEq(DatabaseType databaseType, DbField dbField, StringBuilder sb,
+								   List<DbField> dbFieldList) {
 		sb.append("WHERE ");
-		appendFieldColumnName(databaseType, sb, fieldType, fieldTypeList);
+		appendFieldColumnName(databaseType, sb, dbField, dbFieldList);
 		sb.append("= ?");
 	}
 
@@ -74,11 +74,11 @@ public abstract class BaseMappedStatement<T, ID> {
 		sb.append(' ');
 	}
 
-	static void appendFieldColumnName(DatabaseType databaseType, StringBuilder sb, FieldType fieldType,
-			List<FieldType> fieldTypeList) {
-		databaseType.appendEscapedEntityName(sb, fieldType.getColumnName());
-		if (fieldTypeList != null) {
-			fieldTypeList.add(fieldType);
+	static void appendFieldColumnName(DatabaseType databaseType, StringBuilder sb, DbField dbField,
+			List<DbField> dbFieldList) {
+		databaseType.appendEscapedEntityName(sb, dbField.getColumnName());
+		if (dbFieldList != null) {
+			dbFieldList.add(dbField);
 		}
 		sb.append(' ');
 	}

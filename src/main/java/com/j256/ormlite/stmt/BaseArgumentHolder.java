@@ -2,7 +2,7 @@ package com.j256.ormlite.stmt;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 
 /**
@@ -13,7 +13,7 @@ import com.j256.ormlite.field.SqlType;
 public abstract class BaseArgumentHolder implements ArgumentHolder {
 
 	private String columnName = null;
-	private FieldType fieldType = null;
+	private DbField dbField = null;
 	private SqlType sqlType = null;
 
 	public BaseArgumentHolder() {
@@ -60,22 +60,22 @@ public abstract class BaseArgumentHolder implements ArgumentHolder {
 	}
 
 	@Override
-	public void setMetaInfo(FieldType fieldType) {
-		if (this.fieldType == null) {
+	public void setMetaInfo(DbField dbField) {
+		if (this.dbField == null) {
 			// not set yet
-		} else if (this.fieldType == fieldType) {
+		} else if (this.dbField == dbField) {
 			// set to the same value as before
 		} else {
-			throw new IllegalArgumentException("FieldType name cannot be set twice from " + this.fieldType + " to "
-					+ fieldType + ".  Using a SelectArg twice in query with different columns?");
+			throw new IllegalArgumentException("FieldType name cannot be set twice from " + this.dbField + " to "
+					+ dbField + ".  Using a SelectArg twice in query with different columns?");
 		}
-		this.fieldType = fieldType;
+		this.dbField = dbField;
 	}
 
 	@Override
-	public void setMetaInfo(String columnName, FieldType fieldType) {
+	public void setMetaInfo(String columnName, DbField dbField) {
 		setMetaInfo(columnName);
-		setMetaInfo(fieldType);
+		setMetaInfo(dbField);
 	}
 
 	@Override
@@ -86,19 +86,19 @@ public abstract class BaseArgumentHolder implements ArgumentHolder {
 		Object value = getValue();
 		if (value == null) {
 			return null;
-		} else if (fieldType == null) {
+		} else if (dbField == null) {
 			return value;
-		} else if (fieldType.isForeign() && fieldType.getType() == value.getClass()) {
-			FieldType refFieldType = fieldType.getForeignRefField();
-			return refFieldType.extractJavaFieldValue(value);
+		} else if (dbField.isForeign() && dbField.getType() == value.getClass()) {
+			DbField refDbField = dbField.getForeignRefField();
+			return refDbField.extractJavaFieldValue(value);
 		} else {
-			return fieldType.convertJavaFieldToSqlArgValue(value);
+			return dbField.convertJavaFieldToSqlArgValue(value);
 		}
 	}
 
 	@Override
-	public FieldType getFieldType() {
-		return fieldType;
+	public DbField getFieldType() {
+		return dbField;
 	}
 
 	@Override

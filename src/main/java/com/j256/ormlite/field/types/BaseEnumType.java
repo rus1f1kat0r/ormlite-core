@@ -3,7 +3,7 @@ package com.j256.ormlite.field.types;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 
 /**
@@ -21,12 +21,12 @@ public abstract class BaseEnumType extends BaseDataType {
 		super(sqlType);
 	}
 
-	protected static Enum<?> enumVal(FieldType fieldType, Object val, Enum<?> enumVal, Enum<?> unknownEnumVal)
+	protected static Enum<?> enumVal(DbField dbField, Object val, Enum<?> enumVal, Enum<?> unknownEnumVal)
 			throws SQLException {
 		if (enumVal != null) {
 			return enumVal;
 		} else if (unknownEnumVal == null) {
-			throw new SQLException("Cannot get enum value of '" + val + "' for field " + fieldType);
+			throw new SQLException("Cannot get enum value of '" + val + "' for field " + dbField);
 		} else {
 			return unknownEnumVal;
 		}

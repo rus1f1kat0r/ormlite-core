@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.field.types.DateTypeTest.LocalDate;
@@ -54,10 +55,10 @@ public class TimeStampTypeTest extends BaseTypeTest {
 
 	@Test(expected = SQLException.class)
 	public void testTimeStampParseInvalid() throws Exception {
-		FieldType fieldType =
+		DbField dbField =
 				FieldType.createFieldType(connectionSource, TABLE_NAME,
 						LocalTimeStamp.class.getDeclaredField(TIME_STAMP_COLUMN), LocalTimeStamp.class);
-		dataType.getDataPersister().parseDefaultString(fieldType, "not valid date string");
+		dataType.getDataPersister().parseDefaultString(dbField, "not valid date string");
 	}
 
 	@Test
@@ -164,12 +165,12 @@ public class TimeStampTypeTest extends BaseTypeTest {
 			}
 		}
 		@Override
-		public Object parseDefaultString(FieldType fieldType, String defaultStr) throws SQLException {
+		public Object parseDefaultString(DbField dbField, String defaultStr) throws SQLException {
 			this.defaultStr = defaultStr;
 			if ("CURRENT_TIMESTAMP()".equals(defaultStr)) {
 				return defaultStr;
 			} else {
-				return super.parseDefaultString(fieldType, defaultStr);
+				return super.parseDefaultString(dbField, defaultStr);
 			}
 		}
 	}

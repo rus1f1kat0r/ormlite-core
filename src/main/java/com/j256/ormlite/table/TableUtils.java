@@ -14,7 +14,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.misc.IOUtils;
@@ -33,7 +33,7 @@ import com.j256.ormlite.support.DatabaseResults;
 public class TableUtils {
 
 	private static Logger logger = LoggerFactory.getLogger(TableUtils.class);
-	private static final FieldType[] noFieldTypes = new FieldType[0];
+	private static final DbField[] NO_DB_FIELDs = new DbField[0];
 
 	/**
 	 * For static methods only.
@@ -257,7 +257,7 @@ public class TableUtils {
 		CompiledStatement compiledStmt = null;
 		DatabaseConnection connection = connectionSource.getReadWriteConnection(tableName);
 		try {
-			compiledStmt = connection.compileStatement(statement, StatementType.EXECUTE, noFieldTypes,
+			compiledStmt = connection.compileStatement(statement, StatementType.EXECUTE, NO_DB_FIELDs,
 					DatabaseConnection.DEFAULT_RESULT_FLAGS, false);
 			return compiledStmt.runExecute();
 		} finally {
@@ -285,12 +285,12 @@ public class TableUtils {
 			List<String> statements) {
 		// run through and look for index annotations
 		Set<String> indexSet = new HashSet<String>();
-		for (FieldType fieldType : tableInfo.getFieldTypes()) {
-			String indexName = fieldType.getIndexName();
+		for (DbField dbField : tableInfo.getFieldTypes()) {
+			String indexName = dbField.getIndexName();
 			if (indexName != null) {
 				indexSet.add(indexName);
 			}
-			String uniqueIndexName = fieldType.getUniqueIndexName();
+			String uniqueIndexName = dbField.getUniqueIndexName();
 			if (uniqueIndexName != null) {
 				indexSet.add(uniqueIndexName);
 			}
@@ -310,12 +310,12 @@ public class TableUtils {
 			List<String> statements, boolean ifNotExists, boolean unique) {
 		// run through and look for index annotations
 		Map<String, List<String>> indexMap = new HashMap<String, List<String>>();
-		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+		for (DbField dbField : tableInfo.getFieldTypes()) {
 			String indexName;
 			if (unique) {
-				indexName = fieldType.getUniqueIndexName();
+				indexName = dbField.getUniqueIndexName();
 			} else {
-				indexName = fieldType.getIndexName();
+				indexName = dbField.getIndexName();
 			}
 			if (indexName == null) {
 				continue;
@@ -326,7 +326,7 @@ public class TableUtils {
 				columnList = new ArrayList<String>();
 				indexMap.put(indexName, columnList);
 			}
-			columnList.add(fieldType.getColumnName());
+			columnList.add(dbField.getColumnName());
 		}
 
 		StringBuilder sb = new StringBuilder(128);
@@ -366,8 +366,8 @@ public class TableUtils {
 			List<String> statements) {
 		List<String> statementsBefore = new ArrayList<String>();
 		List<String> statementsAfter = new ArrayList<String>();
-		for (FieldType fieldType : tableInfo.getFieldTypes()) {
-			databaseType.dropColumnArg(fieldType, statementsBefore, statementsAfter);
+		for (DbField dbField : tableInfo.getFieldTypes()) {
+			databaseType.dropColumnArg(dbField, statementsBefore, statementsAfter);
 		}
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("DROP TABLE ");
@@ -412,7 +412,7 @@ public class TableUtils {
 			int rowC = 0;
 			CompiledStatement compiledStmt = null;
 			try {
-				compiledStmt = connection.compileStatement(statement, StatementType.EXECUTE, noFieldTypes,
+				compiledStmt = connection.compileStatement(statement, StatementType.EXECUTE, NO_DB_FIELDs,
 						DatabaseConnection.DEFAULT_RESULT_FLAGS, false);
 				rowC = compiledStmt.runExecute();
 				logger.info("executed {} table statement changed {} rows: {}", label, rowC, statement);
@@ -446,7 +446,7 @@ public class TableUtils {
 		for (String query : queriesAfter) {
 			CompiledStatement compiledStmt = null;
 			try {
-				compiledStmt = connection.compileStatement(query, StatementType.SELECT, noFieldTypes,
+				compiledStmt = connection.compileStatement(query, StatementType.SELECT, NO_DB_FIELDs,
 						DatabaseConnection.DEFAULT_RESULT_FLAGS, false);
 				// we don't care about an object cache here
 				DatabaseResults results = compiledStmt.runQuery(null);
@@ -493,23 +493,23 @@ public class TableUtils {
 		List<String> statementsAfter = new ArrayList<String>();
 		// our statement will be set here later
 		boolean first = true;
-		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+		for (DbField dbField : tableInfo.getFieldTypes()) {
 			// skip foreign collections
-			if (fieldType.isForeignCollection()) {
+			if (dbField.isForeignCollection()) {
 				continue;
 			} else if (first) {
 				first = false;
 			} else {
 				sb.append(", ");
 			}
-			String columnDefinition = fieldType.getColumnDefinition();
+			String columnDefinition = dbField.getColumnDefinition();
 			if (columnDefinition == null) {
 				// we have to call back to the database type for the specific create syntax
-				databaseType.appendColumnArg(tableInfo.getTableName(), sb, fieldType, additionalArgs, statementsBefore,
+				databaseType.appendColumnArg(tableInfo.getTableName(), sb, dbField, additionalArgs, statementsBefore,
 						statementsAfter, queriesAfter);
 			} else {
 				// hand defined field
-				databaseType.appendEscapedEntityName(sb, fieldType.getColumnName());
+				databaseType.appendEscapedEntityName(sb, dbField.getColumnName());
 				sb.append(' ').append(columnDefinition).append(' ');
 			}
 		}

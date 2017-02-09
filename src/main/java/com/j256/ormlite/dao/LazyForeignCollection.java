@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.misc.IOUtils;
 import com.j256.ormlite.support.DatabaseConnection;
@@ -38,9 +38,9 @@ public class LazyForeignCollection<T, ID> extends BaseForeignCollection<T, ID> i
 	 * {@link Dao#assignEmptyForeignCollection(Object, String)} or {@link Dao#getEmptyForeignCollection(String)} methods
 	 * instead.
 	 */
-	public LazyForeignCollection(Dao<T, ID> dao, Object parent, Object parentId, FieldType foreignFieldType,
+	public LazyForeignCollection(Dao<T, ID> dao, Object parent, Object parentId, DbField foreignDbField,
 			String orderColumn, boolean orderAscending) {
-		super(dao, parent, parentId, foreignFieldType, orderColumn, orderAscending);
+		super(dao, parent, parentId, foreignDbField, orderColumn, orderAscending);
 	}
 
 	/**

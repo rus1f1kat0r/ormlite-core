@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.stmt.ArgumentHolder;
 import com.j256.ormlite.stmt.Where;
 
@@ -18,8 +18,8 @@ public class Between extends BaseComparison {
 	private Object low;
 	private Object high;
 
-	public Between(String columnName, FieldType fieldType, Object low, Object high) throws SQLException {
-		super(columnName, fieldType, null, true);
+	public Between(String columnName, DbField dbField, Object low, Object high) throws SQLException {
+		super(columnName, dbField, null, true);
 		this.low = low;
 		this.high = high;
 	}
@@ -38,8 +38,8 @@ public class Between extends BaseComparison {
 		if (high == null) {
 			throw new IllegalArgumentException("BETWEEN high value for '" + columnName + "' is null");
 		}
-		appendArgOrValue(databaseType, fieldType, sb, argList, low);
+		appendArgOrValue(databaseType, dbField, sb, argList, low);
 		sb.append("AND ");
-		appendArgOrValue(databaseType, fieldType, sb, argList, high);
+		appendArgOrValue(databaseType, dbField, sb, argList, high);
 	}
 }

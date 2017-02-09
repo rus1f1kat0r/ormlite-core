@@ -2,7 +2,7 @@ package com.j256.ormlite.stmt;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 
 /**
@@ -27,12 +27,12 @@ public interface ArgumentHolder {
 	/**
 	 * Used internally by the package to set the fieldType associated with this argument.
 	 */
-	public void setMetaInfo(FieldType fieldType);
+	public void setMetaInfo(DbField dbField);
 
 	/**
 	 * Used internally by the package to set the column-name and fieldType associated with this argument.
 	 */
-	public void setMetaInfo(String columnName, FieldType fieldType);
+	public void setMetaInfo(String columnName, DbField dbField);
 
 	/**
 	 * Set the value associated with this argument. The value should be set by the user after the query has been built
@@ -55,5 +55,5 @@ public interface ArgumentHolder {
 	 * Return the field type associated with this class. Either this or the sql-type must be available. The field-type
 	 * is available if there is a corresponding column-name set on the holder.
 	 */
-	public FieldType getFieldType();
+	public DbField getFieldType();
 }

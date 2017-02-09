@@ -20,7 +20,7 @@ import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.DatabaseFieldConfig;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.support.ConnectionSource;
 
 public class DatabaseTableConfigTest {
@@ -42,9 +42,9 @@ public class DatabaseTableConfigTest {
 		assertEquals(DatabaseTableAnno.class, dbTableConf.getDataClass());
 		assertEquals(TABLE_NAME, dbTableConf.getTableName());
 		dbTableConf.extractFieldTypes(connectionSource);
-		FieldType[] fieldTypes = dbTableConf.getFieldTypes(databaseType);
-		assertEquals(1, fieldTypes.length);
-		assertEquals("stuff", fieldTypes[0].getColumnName());
+		DbField[] dbFields = dbTableConf.getFieldTypes(databaseType);
+		assertEquals(1, dbFields.length);
+		assertEquals("stuff", dbFields[0].getColumnName());
 	}
 
 	@Test
@@ -63,9 +63,9 @@ public class DatabaseTableConfigTest {
 		assertEquals(DatabaseTableAnno.class, dbTableConf.getDataClass());
 		assertEquals(TABLE_NAME, dbTableConf.getTableName());
 		dbTableConf.extractFieldTypes(connectionSource);
-		FieldType[] fieldTypes = dbTableConf.getFieldTypes(databaseType);
-		assertEquals(1, fieldTypes.length);
-		assertEquals("stuff", fieldTypes[0].getColumnName());
+		DbField[] dbFields = dbTableConf.getFieldTypes(databaseType);
+		assertEquals(1, dbFields.length);
+		assertEquals("stuff", dbFields[0].getColumnName());
 	}
 
 	@Test
@@ -88,9 +88,9 @@ public class DatabaseTableConfigTest {
 		assertEquals(DatabaseTableAnno.class, dbTableConf.getDataClass());
 		assertEquals(TABLE_NAME, dbTableConf.getTableName());
 		dbTableConf.extractFieldTypes(connectionSource);
-		FieldType[] fieldTypes = dbTableConf.getFieldTypes(databaseType);
-		assertEquals(1, fieldTypes.length);
-		assertEquals("stuff", fieldTypes[0].getColumnName());
+		DbField[] dbFields = dbTableConf.getFieldTypes(databaseType);
+		assertEquals(1, dbFields.length);
+		assertEquals("stuff", dbFields[0].getColumnName());
 	}
 
 	@Test
@@ -116,9 +116,9 @@ public class DatabaseTableConfigTest {
 		assertEquals(DatabaseTableAnno.class, dbTableConf.getDataClass());
 		assertEquals(TABLE_NAME, dbTableConf.getTableName());
 		dbTableConf.extractFieldTypes(connectionSource);
-		FieldType[] fieldTypes = dbTableConf.getFieldTypes(databaseType);
-		assertEquals(1, fieldTypes.length);
-		assertEquals("stuff", fieldTypes[0].getColumnName());
+		DbField[] dbFields = dbTableConf.getFieldTypes(databaseType);
+		assertEquals(1, dbFields.length);
+		assertEquals("stuff", dbFields[0].getColumnName());
 	}
 
 	@Test(expected = SQLException.class)
@@ -166,18 +166,18 @@ public class DatabaseTableConfigTest {
 		dbTableConf.setDataClass(Sub.class);
 		dbTableConf.initialize();
 		dbTableConf.extractFieldTypes(connectionSource);
-		FieldType[] fieldTypes = dbTableConf.getFieldTypes(databaseType);
-		assertEquals(2, fieldTypes.length);
+		DbField[] dbFields = dbTableConf.getFieldTypes(databaseType);
+		assertEquals(2, dbFields.length);
 		boolean seeId = false;
 		boolean seeStuff = false;
-		for (FieldType fieldType : fieldTypes) {
-			String fieldName = fieldType.getFieldName();
+		for (DbField dbField : dbFields) {
+			String fieldName = dbField.getFieldName();
 			if (fieldName.equals("id")) {
 				seeId = true;
-			} else if (fieldType.getFieldName().equals("stuff")) {
+			} else if (dbField.getFieldName().equals("stuff")) {
 				seeStuff = true;
 			} else {
-				fail("Unknown field type " + fieldType);
+				fail("Unknown field type " + dbField);
 			}
 		}
 		assertTrue(seeId);
@@ -196,15 +196,15 @@ public class DatabaseTableConfigTest {
 				new DatabaseTableConfig<SubWithoutAnno>(SubWithoutAnno.class, fieldConfigs);
 		dbTableConf.extractFieldTypes(connectionSource);
 
-		FieldType[] fieldTypes = dbTableConf.getFieldTypes(databaseType);
-		assertTrue(fieldTypes.length >= 2);
+		DbField[] dbFields = dbTableConf.getFieldTypes(databaseType);
+		assertTrue(dbFields.length >= 2);
 		boolean seeId = false;
 		boolean seeStuff = false;
-		for (FieldType fieldType : fieldTypes) {
-			String fieldName = fieldType.getFieldName();
+		for (DbField dbField : dbFields) {
+			String fieldName = dbField.getFieldName();
 			if (fieldName.equals("id")) {
 				seeId = true;
-			} else if (fieldType.getFieldName().equals("stuff")) {
+			} else if (dbField.getFieldName().equals("stuff")) {
 				seeStuff = true;
 			}
 		}

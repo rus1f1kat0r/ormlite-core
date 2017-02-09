@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.Date;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 
 /**
@@ -37,15 +37,15 @@ public class SqlDateStringType extends DateStringType {
 	}
 
 	@Override
-	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) throws SQLException {
-		Date date = (Date) super.sqlArgToJava(fieldType, sqlArg, columnPos);
+	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) throws SQLException {
+		Date date = (Date) super.sqlArgToJava(dbField, sqlArg, columnPos);
 		return new java.sql.Date(date.getTime());
 	}
 
 	@Override
-	public Object javaToSqlArg(FieldType fieldType, Object javaObject) {
+	public Object javaToSqlArg(DbField dbField, Object javaObject) {
 		java.sql.Date date = (java.sql.Date) javaObject;
-		return super.javaToSqlArg(fieldType, new Date(date.getTime()));
+		return super.javaToSqlArg(dbField, new Date(date.getTime()));
 	}
 
 	@Override

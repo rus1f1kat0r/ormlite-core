@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import com.j256.ormlite.field.BaseFieldConverter;
 import com.j256.ormlite.field.DataPersister;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 
 /**
@@ -18,7 +18,7 @@ import com.j256.ormlite.field.SqlType;
  * 
  * <p>
  * <b>NOTE:</b> If you are creating your own custom database persister, you probably will need to override the
- * {@link BaseFieldConverter#sqlArgToJava(FieldType, Object, int)} method as well which converts from a SQL data to
+ * {@link BaseFieldConverter#sqlArgToJava(DbField, Object, int)} method as well which converts from a SQL data to
  * java.
  * </p>
  * 
@@ -85,7 +85,7 @@ public abstract class BaseDataType extends BaseFieldConverter implements DataPer
 	 *             If there are problems creating the config object. Needed for subclasses.
 	 */
 	@Override
-	public Object makeConfigObject(FieldType fieldType) throws SQLException {
+	public Object makeConfigObject(DbField dbField) throws SQLException {
 		return null;
 	}
 
@@ -189,8 +189,8 @@ public abstract class BaseDataType extends BaseFieldConverter implements DataPer
 	}
 
 	@Override
-	public Object resultStringToJava(FieldType fieldType, String stringValue, int columnPos) throws SQLException {
-		return sqlArgToJava(fieldType, parseDefaultString(fieldType, stringValue), columnPos);
+	public Object resultStringToJava(DbField dbField, String stringValue, int columnPos) throws SQLException {
+		return sqlArgToJava(dbField, parseDefaultString(dbField, stringValue), columnPos);
 	}
 
 	@Override

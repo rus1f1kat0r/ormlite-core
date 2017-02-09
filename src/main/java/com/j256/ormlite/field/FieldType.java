@@ -38,10 +38,7 @@ import com.j256.ormlite.table.TableInfo;
  * 
  * @author graywatson
  */
-public class FieldType {
-
-	/** default suffix added to fields that are id fields of foreign objects */
-	public static final String FOREIGN_ID_FIELD_SUFFIX = "_id";
+public class FieldType implements DbField {
 
 	/*
 	 * Default values.
@@ -74,10 +71,10 @@ public class FieldType {
 	private Object dataTypeConfigObj;
 
 	private FieldConverter fieldConverter;
-	private FieldType foreignIdField;
-	private FieldType foreignRefField;
+	private DbField foreignIdField;
+	private DbField foreignRefField;
 	private TableInfo<?, ?> foreignTableInfo;
-	private FieldType foreignFieldType;
+	private DbField foreignDbField;
 	private BaseDaoImpl<?, ?> foreignDao;
 	private MappedQueryForFieldEq<Object, Object> mappedQueryForForeignField;
 
@@ -282,13 +279,14 @@ public class FieldType {
 	 * 
 	 * @see BaseDaoImpl#initialize()
 	 */
+	@Override
 	public void configDaoInformation(ConnectionSource connectionSource, Class<?> parentClass) throws SQLException {
 		Class<?> fieldClass = field.getType();
 		DatabaseType databaseType = connectionSource.getDatabaseType();
 		TableInfo<?, ?> foreignTableInfo;
-		final FieldType foreignIdField;
-		final FieldType foreignRefField;
-		final FieldType foreignFieldType;
+		final DbField foreignIdField;
+		final DbField foreignRefField;
+		final DbField foreignDbField;
 		final BaseDaoImpl<?, ?> foreignDao;
 		final MappedQueryForFieldEq<Object, Object> mappedQueryForForeignField;
 
@@ -323,7 +321,7 @@ public class FieldType {
 					(MappedQueryForFieldEq<Object, Object>) MappedQueryForFieldEq.build(databaseType, foreignTableInfo,
 							foreignRefField);
 			mappedQueryForForeignField = castMappedQueryForForeignField;
-			foreignFieldType = null;
+			foreignDbField = null;
 		} else if (fieldConfig.isForeign()) {
 			if (this.dataPersister != null && this.dataPersister.isPrimitive()) {
 				throw new IllegalArgumentException(
@@ -355,7 +353,7 @@ public class FieldType {
 						"Field " + field.getName() + ", if foreignAutoCreate = true then class "
 								+ fieldClass.getSimpleName() + " must have id field with generatedId = true");
 			}
-			foreignFieldType = null;
+			foreignDbField = null;
 			mappedQueryForForeignField = null;
 		} else if (fieldConfig.isForeignCollection()) {
 			if (fieldClass != Collection.class && !ForeignCollection.class.isAssignableFrom(fieldClass)) {
@@ -398,7 +396,7 @@ public class FieldType {
 				foundDao = castDao;
 			}
 			foreignDao = foundDao;
-			foreignFieldType = findForeignFieldType(collectionClazz, parentClass, (BaseDaoImpl<?, ?>) foundDao);
+			foreignDbField = findForeignFieldType(collectionClazz, parentClass, (BaseDaoImpl<?, ?>) foundDao);
 			foreignIdField = null;
 			foreignRefField = null;
 			foreignTableInfo = null;
@@ -407,14 +405,14 @@ public class FieldType {
 			foreignTableInfo = null;
 			foreignIdField = null;
 			foreignRefField = null;
-			foreignFieldType = null;
+			foreignDbField = null;
 			foreignDao = null;
 			mappedQueryForForeignField = null;
 		}
 
 		this.mappedQueryForForeignField = mappedQueryForForeignField;
 		this.foreignTableInfo = foreignTableInfo;
-		this.foreignFieldType = foreignFieldType;
+		this.foreignDbField = foreignDbField;
 		this.foreignDao = foreignDao;
 		this.foreignIdField = foreignIdField;
 		this.foreignRefField = foreignRefField;
@@ -429,10 +427,12 @@ public class FieldType {
 		return field;
 	}
 
+	@Override
 	public String getTableName() {
 		return tableName;
 	}
 
+	@Override
 	public String getFieldName() {
 		return field.getName();
 	}
@@ -440,6 +440,7 @@ public class FieldType {
 	/**
 	 * Return the class of the field associated with this field type.
 	 */
+	@Override
 	public Class<?> getType() {
 		return field.getType();
 	}
@@ -447,22 +448,27 @@ public class FieldType {
 	/**
 	 * Return the generic type of the field associated with this field type.
 	 */
+	@Override
 	public Type getGenericType() {
 		return field.getGenericType();
 	}
 
+	@Override
 	public String getColumnName() {
 		return columnName;
 	}
 
+	@Override
 	public DataPersister getDataPersister() {
 		return dataPersister;
 	}
 
+	@Override
 	public Object getDataTypeConfigObj() {
 		return dataTypeConfigObj;
 	}
 
+	@Override
 	public SqlType getSqlType() {
 		return fieldConverter.getSqlType();
 	}
@@ -471,14 +477,17 @@ public class FieldType {
 	 * Return the default value as parsed from the {@link DatabaseFieldConfig#getDefaultValue()} or null if no default
 	 * value.
 	 */
+	@Override
 	public Object getDefaultValue() {
 		return defaultValue;
 	}
 
+	@Override
 	public int getWidth() {
 		return fieldConfig.getWidth();
 	}
 
+	@Override
 	public boolean isCanBeNull() {
 		return fieldConfig.isCanBeNull();
 	}
@@ -487,6 +496,7 @@ public class FieldType {
 	 * Return whether the field is an id field. It is an id if {@link DatabaseField#id},
 	 * {@link DatabaseField#generatedId}, OR {@link DatabaseField#generatedIdSequence} are enabled.
 	 */
+	@Override
 	public boolean isId() {
 		return isId;
 	}
@@ -495,6 +505,7 @@ public class FieldType {
 	 * Return whether the field is a generated-id field. This is true if {@link DatabaseField#generatedId} OR
 	 * {@link DatabaseField#generatedIdSequence} are enabled.
 	 */
+	@Override
 	public boolean isGeneratedId() {
 		return isGeneratedId;
 	}
@@ -505,6 +516,7 @@ public class FieldType {
 	 * {@link DatabaseType#isIdSequenceNeeded} is enabled. If the latter is true then the sequence name will be
 	 * auto-generated.
 	 */
+	@Override
 	public boolean isGeneratedIdSequence() {
 		return generatedIdSequence != null;
 	}
@@ -512,10 +524,12 @@ public class FieldType {
 	/**
 	 * Return the generated-id-sequence associated with the field or null if {@link #isGeneratedIdSequence} is false.
 	 */
+	@Override
 	public String getGeneratedIdSequence() {
 		return generatedIdSequence;
 	}
 
+	@Override
 	public boolean isForeign() {
 		return fieldConfig.isForeign();
 	}
@@ -523,6 +537,7 @@ public class FieldType {
 	/**
 	 * Assign to the data object the val corresponding to the fieldType.
 	 */
+	@Override
 	public void assignField(Object data, Object val, boolean parentObject, ObjectCache objectCache)
 			throws SQLException {
 		if (logger.isLevelEnabled(Level.TRACE)) {
@@ -580,6 +595,7 @@ public class FieldType {
 	/**
 	 * Assign an ID value to this field.
 	 */
+	@Override
 	public Object assignIdValue(Object data, Number val, ObjectCache objectCache) throws SQLException {
 		Object idVal = dataPersister.convertIdNumber(val);
 		if (idVal == null) {
@@ -593,6 +609,7 @@ public class FieldType {
 	/**
 	 * Return the value from the field in the object that is defined by this FieldType.
 	 */
+	@Override
 	public <FV> FV extractRawJavaFieldValue(Object object) throws SQLException {
 		Object val;
 		if (fieldGetMethod == null) {
@@ -619,6 +636,7 @@ public class FieldType {
 	 * Return the value from the field in the object that is defined by this FieldType. If the field is a foreign object
 	 * then the ID of the field is returned instead.
 	 */
+	@Override
 	public Object extractJavaFieldValue(Object object) throws SQLException {
 
 		Object val = extractRawJavaFieldValue(object);
@@ -634,6 +652,7 @@ public class FieldType {
 	/**
 	 * Extract a field from an object and convert to something suitable to be passed to SQL as an argument.
 	 */
+	@Override
 	public Object extractJavaFieldToSqlArgValue(Object object) throws SQLException {
 		return convertJavaFieldToSqlArgValue(extractJavaFieldValue(object));
 	}
@@ -641,6 +660,7 @@ public class FieldType {
 	/**
 	 * Convert a field value to something suitable to be stored in the database.
 	 */
+	@Override
 	public Object convertJavaFieldToSqlArgValue(Object fieldVal) throws SQLException {
 		/*
 		 * Limitation here. Some people may want to override the null with their own value in the converter but we
@@ -656,6 +676,7 @@ public class FieldType {
 	/**
 	 * Convert a string value into the appropriate Java field value.
 	 */
+	@Override
 	public Object convertStringToJavaField(String value, int columnPos) throws SQLException {
 		if (value == null) {
 			return null;
@@ -667,6 +688,7 @@ public class FieldType {
 	/**
 	 * Move the SQL value to the next one for version processing.
 	 */
+	@Override
 	public Object moveToNextValue(Object val) throws SQLException {
 		if (dataPersister == null) {
 			return null;
@@ -678,24 +700,28 @@ public class FieldType {
 	/**
 	 * Return the id of the associated foreign object or null if none.
 	 */
-	public FieldType getForeignIdField() {
+	@Override
+	public DbField getForeignIdField() {
 		return foreignIdField;
 	}
 
 	/**
 	 * Return the field associated with the foreign object or null if none.
 	 */
-	public FieldType getForeignRefField() {
+	@Override
+	public DbField getForeignRefField() {
 		return foreignRefField;
 	}
 
 	/**
 	 * Call through to {@link DataPersister#isEscapedValue()}
 	 */
+	@Override
 	public boolean isEscapedValue() {
 		return dataPersister.isEscapedValue();
 	}
 
+	@Override
 	public Enum<?> getUnknownEnumVal() {
 		return fieldConfig.getUnknownEnumValue();
 	}
@@ -703,22 +729,27 @@ public class FieldType {
 	/**
 	 * Return the format of the field.
 	 */
+	@Override
 	public String getFormat() {
 		return fieldConfig.getFormat();
 	}
 
+	@Override
 	public boolean isUnique() {
 		return fieldConfig.isUnique();
 	}
 
+	@Override
 	public boolean isUniqueCombo() {
 		return fieldConfig.isUniqueCombo();
 	}
 
+	@Override
 	public String getIndexName() {
 		return fieldConfig.getIndexName(tableName);
 	}
 
+	@Override
 	public String getUniqueIndexName() {
 		return fieldConfig.getUniqueIndexName(tableName);
 	}
@@ -726,6 +757,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DataPersister#isEscapedDefaultValue()}
 	 */
+	@Override
 	public boolean isEscapedDefaultValue() {
 		return dataPersister.isEscapedDefaultValue();
 	}
@@ -733,6 +765,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DataPersister#isComparable()}
 	 */
+	@Override
 	public boolean isComparable() throws SQLException {
 		if (fieldConfig.isForeignCollection()) {
 			return false;
@@ -752,6 +785,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DataPersister#isArgumentHolderRequired()}
 	 */
+	@Override
 	public boolean isArgumentHolderRequired() {
 		return dataPersister.isArgumentHolderRequired();
 	}
@@ -759,6 +793,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DatabaseFieldConfig#isForeignCollection()}
 	 */
+	@Override
 	public boolean isForeignCollection() {
 		return fieldConfig.isForeignCollection();
 	}
@@ -773,16 +808,17 @@ public class FieldType {
 	 *            The id of the foreign object we will look for. This can be null if we are creating an empty
 	 *            collection.
 	 */
+	@Override
 	public <FT, FID> BaseForeignCollection<FT, FID> buildForeignCollection(Object parent, FID id) throws SQLException {
 		// this can happen if we have a foreign-auto-refresh scenario
-		if (foreignFieldType == null) {
+		if (foreignDbField == null) {
 			return null;
 		}
 		@SuppressWarnings("unchecked")
 		Dao<FT, FID> castDao = (Dao<FT, FID>) foreignDao;
 		if (!fieldConfig.isForeignCollectionEager()) {
 			// we know this won't go recursive so no need for the counters
-			return new LazyForeignCollection<FT, FID>(castDao, parent, id, foreignFieldType,
+			return new LazyForeignCollection<FT, FID>(castDao, parent, id, foreignDbField,
 					fieldConfig.getForeignCollectionOrderColumnName(), fieldConfig.isForeignCollectionOrderAscending());
 		}
 
@@ -791,7 +827,7 @@ public class FieldType {
 		if (levelCounters == null) {
 			if (fieldConfig.getForeignCollectionMaxEagerLevel() == 0) {
 				// then return a lazy collection instead
-				return new LazyForeignCollection<FT, FID>(castDao, parent, id, foreignFieldType,
+				return new LazyForeignCollection<FT, FID>(castDao, parent, id, foreignDbField,
 						fieldConfig.getForeignCollectionOrderColumnName(),
 						fieldConfig.isForeignCollectionOrderAscending());
 			}
@@ -805,12 +841,12 @@ public class FieldType {
 		// are we over our level limit?
 		if (levelCounters.foreignCollectionLevel >= levelCounters.foreignCollectionLevelMax) {
 			// then return a lazy collection instead
-			return new LazyForeignCollection<FT, FID>(castDao, parent, id, foreignFieldType,
+			return new LazyForeignCollection<FT, FID>(castDao, parent, id, foreignDbField,
 					fieldConfig.getForeignCollectionOrderColumnName(), fieldConfig.isForeignCollectionOrderAscending());
 		}
 		levelCounters.foreignCollectionLevel++;
 		try {
-			return new EagerForeignCollection<FT, FID>(castDao, parent, id, foreignFieldType,
+			return new EagerForeignCollection<FT, FID>(castDao, parent, id, foreignDbField,
 					fieldConfig.getForeignCollectionOrderColumnName(), fieldConfig.isForeignCollectionOrderAscending());
 		} finally {
 			levelCounters.foreignCollectionLevel--;
@@ -820,6 +856,7 @@ public class FieldType {
 	/**
 	 * Get the result object from the results. A call through to {@link FieldConverter#resultToJava}.
 	 */
+	@Override
 	public <T> T resultToJava(DatabaseResults results, Map<String, Integer> columnPositions) throws SQLException {
 		Integer dbColumnPos = columnPositions.get(columnName);
 		if (dbColumnPos == null) {
@@ -863,6 +900,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DataPersister#isSelfGeneratedId()}
 	 */
+	@Override
 	public boolean isSelfGeneratedId() {
 		return dataPersister.isSelfGeneratedId();
 	}
@@ -870,6 +908,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DatabaseFieldConfig#isAllowGeneratedIdInsert()}
 	 */
+	@Override
 	public boolean isAllowGeneratedIdInsert() {
 		return fieldConfig.isAllowGeneratedIdInsert();
 	}
@@ -877,6 +916,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DatabaseFieldConfig#getColumnDefinition()}
 	 */
+	@Override
 	public String getColumnDefinition() {
 		return fieldConfig.getColumnDefinition();
 	}
@@ -884,6 +924,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DatabaseFieldConfig#isForeignAutoCreate()}
 	 */
+	@Override
 	public boolean isForeignAutoCreate() {
 		return fieldConfig.isForeignAutoCreate();
 	}
@@ -891,6 +932,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DatabaseFieldConfig#isVersion()}
 	 */
+	@Override
 	public boolean isVersion() {
 		return fieldConfig.isVersion();
 	}
@@ -898,6 +940,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DataPersister#generateId()}
 	 */
+	@Override
 	public Object generateId() {
 		return dataPersister.generateId();
 	}
@@ -905,6 +948,7 @@ public class FieldType {
 	/**
 	 * Call through to {@link DatabaseFieldConfig#isReadOnly()}
 	 */
+	@Override
 	public boolean isReadOnly() {
 		return fieldConfig.isReadOnly();
 	}
@@ -913,6 +957,7 @@ public class FieldType {
 	 * Return the value of field in the data argument if it is not the default value for the class. If it is the default
 	 * then null is returned.
 	 */
+	@Override
 	public <FV> FV getFieldValueIfNotDefault(Object object) throws SQLException {
 		@SuppressWarnings("unchecked")
 		FV fieldValue = (FV) extractJavaFieldValue(object);
@@ -926,6 +971,7 @@ public class FieldType {
 	/**
 	 * Return whether or not the data object has a default value passed for this field of this type.
 	 */
+	@Override
 	public boolean isObjectsFieldValueDefault(Object object) throws SQLException {
 		Object fieldValue = extractJavaFieldValue(object);
 		return isFieldValueDefault(fieldValue);
@@ -935,6 +981,7 @@ public class FieldType {
 	 * Return whether or not the field value passed in is the default value for the type of the field. Null will return
 	 * true.
 	 */
+	@Override
 	public Object getJavaDefaultValueDefault() {
 		if (field.getType() == boolean.class) {
 			return DEFAULT_VALUE_BOOLEAN;
@@ -960,6 +1007,7 @@ public class FieldType {
 	/**
 	 * Pass the foreign data argument to the foreign {@link Dao#create(Object)} method.
 	 */
+	@Override
 	public <T> int createWithForeignDao(T foreignData) throws SQLException {
 		@SuppressWarnings("unchecked")
 		Dao<T, ?> castDao = (Dao<T, ?>) foreignDao;
@@ -1077,17 +1125,22 @@ public class FieldType {
 		}
 	}
 
+	@Override
+	public boolean isForeignAutoRefresh() {
+		return fieldConfig.isForeignAutoRefresh();
+	}
+
 	/**
 	 * If we have a class Foo with a collection of Bar's then we go through Bar's DAO looking for a Foo field. We need
 	 * this field to build the query that is able to find all Bar's that have foo_id that matches our id.
 	 */
-	private FieldType findForeignFieldType(Class<?> clazz, Class<?> foreignClass, BaseDaoImpl<?, ?> foreignDao)
+	private DbField findForeignFieldType(Class<?> clazz, Class<?> foreignClass, BaseDaoImpl<?, ?> foreignDao)
 			throws SQLException {
 		String foreignColumnName = fieldConfig.getForeignCollectionForeignFieldName();
-		for (FieldType fieldType : foreignDao.getTableInfo().getFieldTypes()) {
+		for (DbField fieldType : foreignDao.getTableInfo().getFieldTypes()) {
 			if (fieldType.getType() == foreignClass
-					&& (foreignColumnName == null || fieldType.getField().getName().equals(foreignColumnName))) {
-				if (!fieldType.fieldConfig.isForeign() && !fieldType.fieldConfig.isForeignAutoRefresh()) {
+					&& (foreignColumnName == null || fieldType.getFieldName().equals(foreignColumnName))) {
+				if (!fieldType.isForeign() && !fieldType.isForeignAutoRefresh()) {
 					// this may never be reached
 					throw new SQLException("Foreign collection object " + clazz + " for field '" + field.getName()
 							+ "' contains a field of class " + foreignClass + " but it's not foreign");
@@ -1155,19 +1208,4 @@ public class FieldType {
 		}
 	}
 
-	private static class LevelCounters {
-		
-		LevelCounters() {
-		}
-		
-		// current auto-refresh recursion level
-		int autoRefreshLevel;
-		// maximum auto-refresh recursion level
-		int autoRefreshLevelMax;
-
-		// current foreign-collection recursion level
-		int foreignCollectionLevel;
-		// maximum foreign-collection recursion level
-		int foreignCollectionLevelMax;
-	}
 }

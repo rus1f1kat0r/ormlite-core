@@ -55,7 +55,7 @@ public class NotTest extends BaseCoreStmtTest {
 	public void testToString() throws Exception {
 		String name = "foo";
 		String value = "bar";
-		SimpleComparison eq = new SimpleComparison(name, numberFieldType, value, SimpleComparison.EQUAL_TO_OPERATION);
+		SimpleComparison eq = new SimpleComparison(name, numberDbField, value, SimpleComparison.EQUAL_TO_OPERATION);
 		Not not = new Not();
 		assertTrue(not.toString().contains("NOT without comparison"));
 		not.setMissingClause(eq);

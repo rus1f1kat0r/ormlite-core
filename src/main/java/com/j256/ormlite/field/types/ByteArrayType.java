@@ -3,7 +3,7 @@ package com.j256.ormlite.field.types;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.support.DatabaseResults;
 
@@ -32,7 +32,7 @@ public class ByteArrayType extends BaseDataType {
 	}
 
 	@Override
-	public Object parseDefaultString(FieldType fieldType, String defaultStr) {
+	public Object parseDefaultString(DbField dbField, String defaultStr) {
 		if (defaultStr == null) {
 			return null;
 		} else {
@@ -41,7 +41,7 @@ public class ByteArrayType extends BaseDataType {
 	}
 
 	@Override
-	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
 		return (byte[]) results.getBytes(columnPos);
 	}
 
@@ -62,7 +62,7 @@ public class ByteArrayType extends BaseDataType {
 	}
 
 	@Override
-	public Object resultStringToJava(FieldType fieldType, String stringValue, int columnPos) {
+	public Object resultStringToJava(DbField dbField, String stringValue, int columnPos) {
 		return stringValue.getBytes();
 	}
 

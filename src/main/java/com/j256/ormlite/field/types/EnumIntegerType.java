@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.support.DatabaseResults;
 
@@ -34,33 +34,33 @@ public class EnumIntegerType extends BaseEnumType {
 	}
 
 	@Override
-	public Object parseDefaultString(FieldType fieldType, String defaultStr) {
+	public Object parseDefaultString(DbField dbField, String defaultStr) {
 		return Integer.parseInt(defaultStr);
 	}
 
 	@Override
-	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
 		return results.getInt(columnPos);
 	}
 
 	@Override
-	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) throws SQLException {
-		if (fieldType == null) {
+	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) throws SQLException {
+		if (dbField == null) {
 			return sqlArg;
 		}
 		// do this once
 		Integer valInteger = (Integer) sqlArg;
 		@SuppressWarnings("unchecked")
-		Map<Integer, Enum<?>> enumIntMap = (Map<Integer, Enum<?>>) fieldType.getDataTypeConfigObj();
+		Map<Integer, Enum<?>> enumIntMap = (Map<Integer, Enum<?>>) dbField.getDataTypeConfigObj();
 		if (enumIntMap == null) {
-			return enumVal(fieldType, valInteger, null, fieldType.getUnknownEnumVal());
+			return enumVal(dbField, valInteger, null, dbField.getUnknownEnumVal());
 		} else {
-			return enumVal(fieldType, valInteger, enumIntMap.get(valInteger), fieldType.getUnknownEnumVal());
+			return enumVal(dbField, valInteger, enumIntMap.get(valInteger), dbField.getUnknownEnumVal());
 		}
 	}
 
 	@Override
-	public Object javaToSqlArg(FieldType fieldType, Object obj) {
+	public Object javaToSqlArg(DbField dbField, Object obj) {
 		Enum<?> enumVal = (Enum<?>) obj;
 		return (Integer) enumVal.ordinal();
 	}
@@ -71,11 +71,11 @@ public class EnumIntegerType extends BaseEnumType {
 	}
 
 	@Override
-	public Object makeConfigObject(FieldType fieldType) throws SQLException {
+	public Object makeConfigObject(DbField dbField) throws SQLException {
 		Map<Integer, Enum<?>> enumIntMap = new HashMap<Integer, Enum<?>>();
-		Enum<?>[] constants = (Enum<?>[]) fieldType.getType().getEnumConstants();
+		Enum<?>[] constants = (Enum<?>[]) dbField.getType().getEnumConstants();
 		if (constants == null) {
-			throw new SQLException("Field " + fieldType + " improperly configured as type " + this);
+			throw new SQLException("Field " + dbField + " improperly configured as type " + this);
 		}
 		for (Enum<?> enumVal : constants) {
 			enumIntMap.put(enumVal.ordinal(), enumVal);

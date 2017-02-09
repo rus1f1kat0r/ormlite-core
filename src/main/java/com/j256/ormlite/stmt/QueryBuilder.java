@@ -9,6 +9,7 @@ import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.db.DatabaseType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.stmt.query.ColumnNameOrRawSql;
@@ -31,8 +32,8 @@ import com.j256.ormlite.table.TableInfo;
  */
 public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 
-	private final FieldType idField;
-	private FieldType[] resultFieldTypes;
+	private final DbField idField;
+	private DbField[] resultFieldTypes;
 
 	private boolean distinct;
 	private boolean selectIdColumn;
@@ -152,8 +153,8 @@ public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 	 * </p>
 	 */
 	public QueryBuilder<T, ID> groupBy(String columnName) {
-		FieldType fieldType = verifyColumnName(columnName);
-		if (fieldType.isForeignCollection()) {
+		DbField dbField = verifyColumnName(columnName);
+		if (dbField.isForeignCollection()) {
 			throw new IllegalArgumentException("Can't groupBy foreign colletion field: " + columnName);
 		}
 		addGroupBy(ColumnNameOrRawSql.withColumnName(columnName));
@@ -173,8 +174,8 @@ public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 	 * clauses. Ones earlier are applied first.
 	 */
 	public QueryBuilder<T, ID> orderBy(String columnName, boolean ascending) {
-		FieldType fieldType = verifyColumnName(columnName);
-		if (fieldType.isForeignCollection()) {
+		DbField dbField = verifyColumnName(columnName);
+		if (dbField.isForeignCollection()) {
 			throw new IllegalArgumentException("Can't orderBy foreign colletion field: " + columnName);
 		}
 		addOrderBy(new OrderBy(columnName, ascending));
@@ -496,7 +497,7 @@ public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 	}
 
 	@Override
-	protected FieldType[] getResultFieldTypes() {
+	protected DbField[] getResultFieldTypes() {
 		return resultFieldTypes;
 	}
 
@@ -610,20 +611,20 @@ public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 	 * Match up our joined fields so we can throw a nice exception immediately if you can't join with this type.
 	 */
 	private void matchJoinedFields(JoinInfo joinInfo, QueryBuilder<?, ?> joinedQueryBuilder) throws SQLException {
-		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+		for (DbField dbField : tableInfo.getFieldTypes()) {
 			// if this is a foreign field and its foreign field is the same as the other's id
-			FieldType foreignRefField = fieldType.getForeignRefField();
-			if (fieldType.isForeign() && foreignRefField.equals(joinedQueryBuilder.tableInfo.getIdField())) {
-				joinInfo.localField = fieldType;
+			DbField foreignRefField = dbField.getForeignRefField();
+			if (dbField.isForeign() && foreignRefField.equals(joinedQueryBuilder.tableInfo.getIdField())) {
+				joinInfo.localField = dbField;
 				joinInfo.remoteField = foreignRefField;
 				return;
 			}
 		}
 		// if this other field is a foreign field and its foreign-id field is our id
-		for (FieldType fieldType : joinedQueryBuilder.tableInfo.getFieldTypes()) {
-			if (fieldType.isForeign() && fieldType.getForeignIdField().equals(idField)) {
+		for (DbField dbField : joinedQueryBuilder.tableInfo.getFieldTypes()) {
+			if (dbField.isForeign() && dbField.getForeignIdField().equals(idField)) {
 				joinInfo.localField = idField;
-				joinInfo.remoteField = fieldType;
+				joinInfo.remoteField = dbField;
 				return;
 			}
 		}
@@ -689,7 +690,7 @@ public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 		} else {
 			hasId = false;
 		}
-		List<FieldType> fieldTypeList = new ArrayList<FieldType>(selectList.size() + 1);
+		List<DbField> dbFieldList = new ArrayList<DbField>(selectList.size() + 1);
 		for (ColumnNameOrRawSql select : selectList) {
 			if (select.getRawSql() != null) {
 				// if any are raw-sql then that's our type
@@ -702,13 +703,13 @@ public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 				sb.append(select.getRawSql());
 				continue;
 			}
-			FieldType fieldType = tableInfo.getFieldTypeByColumnName(select.getColumnName());
+			DbField dbField = tableInfo.getFieldTypeByColumnName(select.getColumnName());
 			/*
 			 * If this is a foreign-collection then we add it to our field-list but _not_ to the select list because
 			 * foreign collections don't have a column in the database.
 			 */
-			if (fieldType.isForeignCollection()) {
-				fieldTypeList.add(fieldType);
+			if (dbField.isForeignCollection()) {
+				dbFieldList.add(dbField);
 				continue;
 			}
 			if (first) {
@@ -716,8 +717,8 @@ public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 			} else {
 				sb.append(", ");
 			}
-			appendFieldColumnName(sb, fieldType, fieldTypeList);
-			if (fieldType == idField) {
+			appendFieldColumnName(sb, dbField, dbFieldList);
+			if (dbField == idField) {
 				hasId = true;
 			}
 		}
@@ -728,18 +729,18 @@ public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 				if (!first) {
 					sb.append(',');
 				}
-				appendFieldColumnName(sb, idField, fieldTypeList);
+				appendFieldColumnName(sb, idField, dbFieldList);
 			}
 
-			resultFieldTypes = fieldTypeList.toArray(new FieldType[fieldTypeList.size()]);
+			resultFieldTypes = dbFieldList.toArray(new DbField[dbFieldList.size()]);
 		}
 		sb.append(' ');
 	}
 
-	private void appendFieldColumnName(StringBuilder sb, FieldType fieldType, List<FieldType> fieldTypeList) {
-		appendColumnName(sb, fieldType.getColumnName());
-		if (fieldTypeList != null) {
-			fieldTypeList.add(fieldType);
+	private void appendFieldColumnName(StringBuilder sb, DbField dbField, List<DbField> dbFieldList) {
+		appendColumnName(sb, dbField.getColumnName());
+		if (dbFieldList != null) {
+			dbFieldList.add(dbField);
 		}
 	}
 
@@ -884,8 +885,8 @@ public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 	private static class JoinInfo {
 		final JoinType type;
 		final QueryBuilder<?, ?> queryBuilder;
-		FieldType localField;
-		FieldType remoteField;
+		DbField localField;
+		DbField remoteField;
 		JoinWhereOperation operation;
 
 		public JoinInfo(JoinType type, QueryBuilder<?, ?> queryBuilder, JoinWhereOperation operation) {
@@ -910,7 +911,7 @@ public class QueryBuilder<T, ID> extends StatementBuilder<T, ID> {
 			queryBuilder.appendStatementString(sb, argList);
 		}
 
-		public FieldType[] getResultFieldTypes() {
+		public DbField[] getResultFieldTypes() {
 			return queryBuilder.getResultFieldTypes();
 		}
 	}

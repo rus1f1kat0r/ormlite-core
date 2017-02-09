@@ -17,6 +17,7 @@ import org.junit.Test;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
@@ -69,14 +70,14 @@ public class SerializableTypeTest extends BaseTypeTest {
 		CompiledStatement stmt = null;
 		try {
 			stmt =
-					conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, noFieldTypes,
+					conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, NO_DB_FIELDs,
 							DatabaseConnection.DEFAULT_RESULT_FLAGS, true);
 			DatabaseResults results = stmt.runQuery(null);
 			assertTrue(results.next());
-			FieldType fieldType =
+			DbField dbField =
 					FieldType.createFieldType(connectionSource, TABLE_NAME,
 							clazz.getDeclaredField(SERIALIZABLE_COLUMN), clazz);
-			assertNull(DataType.SERIALIZABLE.getDataPersister().resultToJava(fieldType, results,
+			assertNull(DataType.SERIALIZABLE.getDataPersister().resultToJava(dbField, results,
 					results.findColumn(SERIALIZABLE_COLUMN)));
 		} finally {
 			if (stmt != null) {
@@ -97,14 +98,14 @@ public class SerializableTypeTest extends BaseTypeTest {
 		CompiledStatement stmt = null;
 		try {
 			stmt =
-					conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, noFieldTypes,
+					conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, NO_DB_FIELDs,
 							DatabaseConnection.DEFAULT_RESULT_FLAGS, true);
 			DatabaseResults results = stmt.runQuery(null);
 			assertTrue(results.next());
-			FieldType fieldType =
+			DbField dbField =
 					FieldType.createFieldType(connectionSource, TABLE_NAME,
 							LocalSerializable.class.getDeclaredField(SERIALIZABLE_COLUMN), LocalSerializable.class);
-			DataType.SERIALIZABLE.getDataPersister().resultToJava(fieldType, results, results.findColumn(BYTE_COLUMN));
+			DataType.SERIALIZABLE.getDataPersister().resultToJava(dbField, results, results.findColumn(BYTE_COLUMN));
 		} finally {
 			if (stmt != null) {
 				stmt.close();

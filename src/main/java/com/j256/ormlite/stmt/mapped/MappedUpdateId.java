@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.table.TableInfo;
@@ -16,8 +16,8 @@ import com.j256.ormlite.table.TableInfo;
  */
 public class MappedUpdateId<T, ID> extends BaseMappedStatement<T, ID> {
 
-	private MappedUpdateId(TableInfo<T, ID> tableInfo, String statement, FieldType[] argFieldTypes) {
-		super(tableInfo, statement, argFieldTypes);
+	private MappedUpdateId(TableInfo<T, ID> tableInfo, String statement, DbField[] argDbFields) {
+		super(tableInfo, statement, argDbFields);
 	}
 
 	/**
@@ -28,7 +28,7 @@ public class MappedUpdateId<T, ID> extends BaseMappedStatement<T, ID> {
 		try {
 			// the arguments are the new-id and old-id
 			Object[] args = new Object[] { convertIdToFieldObject(newId), extractIdToFieldObject(data) };
-			int rowC = databaseConnection.update(statement, args, argFieldTypes);
+			int rowC = databaseConnection.update(statement, args, argDbFields);
 			if (rowC > 0) {
 				if (objectCache != null) {
 					Object oldId = idField.extractJavaFieldValue(data);
@@ -54,7 +54,7 @@ public class MappedUpdateId<T, ID> extends BaseMappedStatement<T, ID> {
 
 	public static <T, ID> MappedUpdateId<T, ID> build(DatabaseType databaseType, TableInfo<T, ID> tableInfo)
 			throws SQLException {
-		FieldType idField = tableInfo.getIdField();
+		DbField idField = tableInfo.getIdField();
 		if (idField == null) {
 			throw new SQLException("Cannot update-id in " + tableInfo.getDataClass()
 					+ " because it doesn't have an id field");
@@ -65,7 +65,7 @@ public class MappedUpdateId<T, ID> extends BaseMappedStatement<T, ID> {
 		appendFieldColumnName(databaseType, sb, idField, null);
 		sb.append("= ? ");
 		appendWhereFieldEq(databaseType, idField, sb, null);
-		return new MappedUpdateId<T, ID>(tableInfo, sb.toString(), new FieldType[] { idField, idField });
+		return new MappedUpdateId<T, ID>(tableInfo, sb.toString(), new DbField[] { idField, idField });
 	}
 
 	/**

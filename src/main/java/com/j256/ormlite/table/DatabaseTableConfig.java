@@ -9,6 +9,7 @@ import java.util.List;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.DatabaseFieldConfig;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.misc.JavaxPersistenceConfigurer;
 import com.j256.ormlite.support.ConnectionSource;
@@ -26,7 +27,7 @@ public class DatabaseTableConfig<T> {
 	private Class<T> dataClass;
 	private String tableName;
 	private List<DatabaseFieldConfig> fieldConfigs;
-	private FieldType[] fieldTypes;
+	private DbField[] fieldTypes;
 	private Constructor<T> constructor;
 
 	static {
@@ -63,7 +64,7 @@ public class DatabaseTableConfig<T> {
 		this.fieldConfigs = fieldConfigs;
 	}
 
-	private DatabaseTableConfig(Class<T> dataClass, String tableName, FieldType[] fieldTypes) {
+	private DatabaseTableConfig(Class<T> dataClass, String tableName, DbField[] fieldTypes) {
 		this.dataClass = dataClass;
 		this.tableName = tableName;
 		this.fieldTypes = fieldTypes;
@@ -121,7 +122,7 @@ public class DatabaseTableConfig<T> {
 	/**
 	 * Return the field types associated with this configuration.
 	 */
-	public FieldType[] getFieldTypes(DatabaseType databaseType) throws SQLException {
+	public DbField[] getFieldTypes(DatabaseType databaseType) throws SQLException {
 		if (fieldTypes == null) {
 			throw new SQLException("Field types have not been extracted in table config");
 		}
@@ -214,29 +215,29 @@ public class DatabaseTableConfig<T> {
 		}
 	}
 
-	private static <T> FieldType[] extractFieldTypes(ConnectionSource connectionSource, Class<T> clazz, String tableName)
+	private static <T> DbField[] extractFieldTypes(ConnectionSource connectionSource, Class<T> clazz, String tableName)
 			throws SQLException {
-		List<FieldType> fieldTypes = new ArrayList<FieldType>();
+		List<DbField> dbFields = new ArrayList<DbField>();
 		for (Class<?> classWalk = clazz; classWalk != null; classWalk = classWalk.getSuperclass()) {
 			for (Field field : classWalk.getDeclaredFields()) {
-				FieldType fieldType = FieldType.createFieldType(connectionSource, tableName, field, clazz);
-				if (fieldType != null) {
-					fieldTypes.add(fieldType);
+				DbField dbField = FieldType.createFieldType(connectionSource, tableName, field, clazz);
+				if (dbField != null) {
+					dbFields.add(dbField);
 				}
 			}
 		}
-		if (fieldTypes.isEmpty()) {
+		if (dbFields.isEmpty()) {
 			throw new IllegalArgumentException("No fields have a " + DatabaseField.class.getSimpleName()
 					+ " annotation in " + clazz);
 		}
-		return fieldTypes.toArray(new FieldType[fieldTypes.size()]);
+		return dbFields.toArray(new DbField[dbFields.size()]);
 	}
 
-	private FieldType[] convertFieldConfigs(ConnectionSource connectionSource, String tableName,
+	private DbField[] convertFieldConfigs(ConnectionSource connectionSource, String tableName,
 			List<DatabaseFieldConfig> fieldConfigs) throws SQLException {
-		List<FieldType> fieldTypes = new ArrayList<FieldType>();
+		List<DbField> dbFields = new ArrayList<DbField>();
 		for (DatabaseFieldConfig fieldConfig : fieldConfigs) {
-			FieldType fieldType = null;
+			DbField dbField = null;
 			// walk up the classes until we find the field
 			for (Class<?> classWalk = dataClass; classWalk != null; classWalk = classWalk.getSuperclass()) {
 				Field field;
@@ -247,20 +248,20 @@ public class DatabaseTableConfig<T> {
 					continue;
 				}
 				if (field != null) {
-					fieldType = new FieldType(connectionSource, tableName, field, fieldConfig, dataClass);
+					dbField = new FieldType(connectionSource, tableName, field, fieldConfig, dataClass);
 					break;
 				}
 			}
 
-			if (fieldType == null) {
+			if (dbField == null) {
 				throw new SQLException("Could not find declared field with name '" + fieldConfig.getFieldName()
 						+ "' for " + dataClass);
 			}
-			fieldTypes.add(fieldType);
+			dbFields.add(dbField);
 		}
-		if (fieldTypes.isEmpty()) {
+		if (dbFields.isEmpty()) {
 			throw new SQLException("No fields were configured for class " + dataClass);
 		}
-		return fieldTypes.toArray(new FieldType[fieldTypes.size()]);
+		return dbFields.toArray(new DbField[dbFields.size()]);
 	}
 }

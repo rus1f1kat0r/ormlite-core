@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.db.DatabaseType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
@@ -74,15 +75,15 @@ public abstract class StatementBuilder<T, ID> {
 		List<ArgumentHolder> argList = new ArrayList<ArgumentHolder>();
 		String statement = buildStatementString(argList);
 		ArgumentHolder[] selectArgs = argList.toArray(new ArgumentHolder[argList.size()]);
-		FieldType[] resultFieldTypes = getResultFieldTypes();
-		FieldType[] argFieldTypes = new FieldType[argList.size()];
+		DbField[] resultFieldTypes = getResultFieldTypes();
+		DbField[] argDbFields = new DbField[argList.size()];
 		for (int selectC = 0; selectC < selectArgs.length; selectC++) {
-			argFieldTypes[selectC] = selectArgs[selectC].getFieldType();
+			argDbFields[selectC] = selectArgs[selectC].getFieldType();
 		}
 		if (!type.isOkForStatementBuilder()) {
 			throw new IllegalStateException("Building a statement from a " + type + " statement is not allowed");
 		}
-		return new MappedPreparedStmt<T, ID>(tableInfo, statement, argFieldTypes, resultFieldTypes, selectArgs,
+		return new MappedPreparedStmt<T, ID>(tableInfo, statement, argDbFields, resultFieldTypes, selectArgs,
 				(databaseType.isLimitSqlSupported() ? null : limit), type, cacheStore);
 	}
 
@@ -169,7 +170,7 @@ public abstract class StatementBuilder<T, ID> {
 	 * Get the result array from our statement after the {@link #appendStatementStart(StringBuilder, List)} was called.
 	 * This will be null except for the QueryBuilder.
 	 */
-	protected FieldType[] getResultFieldTypes() {
+	protected DbField[] getResultFieldTypes() {
 		return null;
 	}
 
@@ -179,7 +180,7 @@ public abstract class StatementBuilder<T, ID> {
 	 * @throws IllegalArgumentException
 	 *             if the column name is not valid.
 	 */
-	protected FieldType verifyColumnName(String columnName) {
+	protected DbField verifyColumnName(String columnName) {
 		return tableInfo.getFieldTypeByColumnName(columnName);
 	}
 

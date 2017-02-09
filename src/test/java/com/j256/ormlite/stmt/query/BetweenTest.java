@@ -18,7 +18,7 @@ public class BetweenTest extends BaseCoreStmtTest {
 	public void testAppendOperation() throws Exception {
 		int low = 10;
 		int high = 20;
-		Between btw = new Between(COLUMN_NAME, numberFieldType, low, high);
+		Between btw = new Between(COLUMN_NAME, numberDbField, low, high);
 		StringBuilder sb = new StringBuilder();
 		btw.appendOperation(sb);
 		assertTrue(sb.toString().contains("BETWEEN"));
@@ -29,13 +29,13 @@ public class BetweenTest extends BaseCoreStmtTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testAppendValueLowNull() throws Exception {
-		new Between(COLUMN_NAME, numberFieldType, null, 20L).appendValue(null, new StringBuilder(),
+		new Between(COLUMN_NAME, numberDbField, null, 20L).appendValue(null, new StringBuilder(),
 				new ArrayList<ArgumentHolder>());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testAppendValueHighNull() throws Exception {
-		new Between(COLUMN_NAME, numberFieldType, 10L, null).appendValue(null, new StringBuilder(),
+		new Between(COLUMN_NAME, numberDbField, 10L, null).appendValue(null, new StringBuilder(),
 				new ArrayList<ArgumentHolder>());
 	}
 }

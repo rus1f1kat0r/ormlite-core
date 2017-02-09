@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.j256.ormlite.dao.BaseForeignCollection;
 import com.j256.ormlite.dao.ObjectCache;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.GenericRowMapper;
 import com.j256.ormlite.support.DatabaseResults;
@@ -18,15 +19,15 @@ import com.j256.ormlite.table.TableInfo;
  */
 public abstract class BaseMappedQuery<T, ID> extends BaseMappedStatement<T, ID> implements GenericRowMapper<T> {
 
-	protected final FieldType[] resultsFieldTypes;
+	protected final DbField[] resultsFieldTypes;
 	// cache of column names to results position
 	private Map<String, Integer> columnPositions = null;
 	private Object parent = null;
 	private Object parentId = null;
 
-	protected BaseMappedQuery(TableInfo<T, ID> tableInfo, String statement, FieldType[] argFieldTypes,
-			FieldType[] resultsFieldTypes) {
-		super(tableInfo, statement, argFieldTypes);
+	protected BaseMappedQuery(TableInfo<T, ID> tableInfo, String statement, DbField[] argDbFields,
+			DbField[] resultsFieldTypes) {
+		super(tableInfo, statement, argDbFields);
 		this.resultsFieldTypes = resultsFieldTypes;
 	}
 
@@ -54,7 +55,7 @@ public abstract class BaseMappedQuery<T, ID> extends BaseMappedStatement<T, ID> 
 		// populate its fields
 		Object id = null;
 		boolean foreignCollections = false;
-		for (FieldType fieldType : resultsFieldTypes) {
+		for (DbField fieldType : resultsFieldTypes) {
 			if (fieldType.isForeignCollection()) {
 				foreignCollections = true;
 			} else {
@@ -65,7 +66,7 @@ public abstract class BaseMappedQuery<T, ID> extends BaseMappedStatement<T, ID> 
 				 * were then set with the parent class. Only the fields that have a matching id value should be set to
 				 * the parent. We had to add the val.equals logic.
 				 */
-				if (val != null && parent != null && fieldType.getField().getType() == parent.getClass()
+				if (val != null && parent != null && fieldType.getType() == parent.getClass()
 						&& val.equals(parentId)) {
 					fieldType.assignField(instance, parent, true, objectCache);
 				} else {
@@ -78,11 +79,11 @@ public abstract class BaseMappedQuery<T, ID> extends BaseMappedStatement<T, ID> 
 		}
 		if (foreignCollections) {
 			// go back and initialize any foreign collections
-			for (FieldType fieldType : resultsFieldTypes) {
-				if (fieldType.isForeignCollection()) {
-					BaseForeignCollection<?, ?> collection = fieldType.buildForeignCollection(instance, id);
+			for (DbField dbField : resultsFieldTypes) {
+				if (dbField.isForeignCollection()) {
+					BaseForeignCollection<?, ?> collection = dbField.buildForeignCollection(instance, id);
 					if (collection != null) {
-						fieldType.assignField(instance, collection, false, objectCache);
+						dbField.assignField(instance, collection, false, objectCache);
 					}
 				}
 			}

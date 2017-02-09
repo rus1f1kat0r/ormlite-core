@@ -8,7 +8,7 @@ import com.j256.ormlite.support.DatabaseResults;
 /**
  * Convert a Java object into the appropriate argument to a SQL statement and then back from the result set to the Java
  * object. This allows databases to configure per-type conversion. This is used by the
- * {@link BaseDatabaseType#getFieldConverter(DataPersister, FieldType)} method to find the converter for a particular
+ * {@link BaseDatabaseType#getFieldConverter(DataPersister, DbField)} method to find the converter for a particular
  * database type. Databases can then override the default data conversion mechanisms as necessary.
  * 
  * @author graywatson
@@ -20,12 +20,12 @@ public interface FieldConverter {
 	 * 
 	 * @return Result object to insert if the field is not specified or null if none.
 	 */
-	public Object parseDefaultString(FieldType fieldType, String defaultStr) throws SQLException;
+	public Object parseDefaultString(DbField dbField, String defaultStr) throws SQLException;
 
 	/**
 	 * Convert a Java object and return the appropriate argument to a SQL insert or update statement.
 	 */
-	public Object javaToSqlArg(FieldType fieldType, Object obj) throws SQLException;
+	public Object javaToSqlArg(DbField dbField, Object obj) throws SQLException;
 
 	/**
 	 * Return the SQL argument object extracted from the results associated with column in position columnPos. For
@@ -33,29 +33,29 @@ public interface FieldConverter {
 	 * 
 	 * @throws SQLException
 	 *             If there is a problem accessing the results data.
-	 * @param fieldType
+	 * @param dbField
 	 *            Associated FieldType which may be null.
 	 */
-	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException;
+	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException;
 
 	/**
-	 * This is usually just a call that takes the result from {@link #resultToSqlArg(FieldType, DatabaseResults, int)}
-	 * and passes it through {@link #sqlArgToJava(FieldType, Object, int)}.
+	 * This is usually just a call that takes the result from {@link #resultToSqlArg(DbField, DatabaseResults, int)}
+	 * and passes it through {@link #sqlArgToJava(DbField, Object, int)}.
 	 */
-	public Object resultToJava(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException;
+	public Object resultToJava(DbField dbField, DatabaseResults results, int columnPos) throws SQLException;
 
 	/**
 	 * Return the object converted from the SQL arg to java. This takes the database representation and converts it into
 	 * a Java object. For example, if the type is a date-long then this will take a long which is stored in the database
 	 * and return a Date.
 	 * 
-	 * @param fieldType
+	 * @param dbField
 	 *            Associated FieldType which may be null.
 	 * @param sqlArg
-	 *            SQL argument converted with {@link #resultToSqlArg(FieldType, DatabaseResults, int)} which will not be
+	 *            SQL argument converted with {@link #resultToSqlArg(DbField, DatabaseResults, int)} which will not be
 	 *            null.
 	 */
-	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) throws SQLException;
+	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) throws SQLException;
 
 	/**
 	 * Return the SQL type that is stored in the database for this argument.
@@ -71,5 +71,5 @@ public interface FieldConverter {
 	/**
 	 * Convert a string result value to the related Java field.
 	 */
-	public Object resultStringToJava(FieldType fieldType, String stringValue, int columnPos) throws SQLException;
+	public Object resultStringToJava(DbField dbField, String stringValue, int columnPos) throws SQLException;
 }

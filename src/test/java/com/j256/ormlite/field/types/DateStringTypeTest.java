@@ -16,6 +16,7 @@ import org.junit.Test;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
@@ -57,10 +58,10 @@ public class DateStringTypeTest extends BaseTypeTest {
 
 	@Test(expected = SQLException.class)
 	public void testDateStringParseInvalid() throws Exception {
-		FieldType fieldType =
+		DbField dbField =
 				FieldType.createFieldType(connectionSource, TABLE_NAME,
 						LocalDateString.class.getDeclaredField(DATE_COLUMN), LocalDateString.class);
-		DataType.DATE_STRING.getDataPersister().parseDefaultString(fieldType, "not valid date string");
+		DataType.DATE_STRING.getDataPersister().parseDefaultString(dbField, "not valid date string");
 	}
 
 	@Test(expected = SQLException.class)
@@ -74,7 +75,7 @@ public class DateStringTypeTest extends BaseTypeTest {
 		CompiledStatement stmt = null;
 		try {
 			stmt =
-					conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, noFieldTypes,
+					conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, NO_DB_FIELDs,
 							DatabaseConnection.DEFAULT_RESULT_FLAGS, true);
 			DatabaseResults results = stmt.runQuery(null);
 			assertTrue(results.next());

@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.j256.ormlite.db.BaseDatabaseType;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 
 /**
  * H2 database type.
@@ -55,11 +55,11 @@ public class H2DatabaseType extends BaseDatabaseType {
 	}
 
 	@Override
-	protected void configureGeneratedId(String tableName, StringBuilder sb, FieldType fieldType,
+	protected void configureGeneratedId(String tableName, StringBuilder sb, DbField dbField,
 			List<String> statementsBefore, List<String> statementsAfter, List<String> additionalArgs,
 			List<String> queriesAfter) {
 		sb.append("AUTO_INCREMENT ");
-		configureId(sb, fieldType, statementsBefore, additionalArgs, queriesAfter);
+		configureId(sb, dbField, statementsBefore, additionalArgs, queriesAfter);
 	}
 
 	@Override

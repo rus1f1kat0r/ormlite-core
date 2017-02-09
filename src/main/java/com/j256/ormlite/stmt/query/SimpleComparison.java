@@ -2,7 +2,7 @@ package com.j256.ormlite.stmt.query;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 
 /**
  * Internal class handling a simple comparison query part where the operation is passed in.
@@ -21,8 +21,8 @@ public class SimpleComparison extends BaseComparison {
 
 	private final String operation;
 
-	public SimpleComparison(String columnName, FieldType fieldType, Object value, String operation) throws SQLException {
-		super(columnName, fieldType, value, true);
+	public SimpleComparison(String columnName, DbField dbField, Object value, String operation) throws SQLException {
+		super(columnName, dbField, value, true);
 		this.operation = operation;
 	}
 

@@ -26,6 +26,7 @@ import com.j256.ormlite.BaseCoreTest;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.h2.H2DatabaseType;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
@@ -65,7 +66,7 @@ public class TableUtilsTest extends BaseCoreTest {
 		final String queryAfter = "SELECT * from foo";
 		DatabaseType databaseType = new H2DatabaseType() {
 			@Override
-			public void appendColumnArg(String tableName, StringBuilder sb, FieldType fieldType,
+			public void appendColumnArg(String tableName, StringBuilder sb, DbField fieldType,
 					List<String> additionalArgs, List<String> statementsBefore, List<String> statementsAfter,
 					List<String> queriesAfter) throws SQLException {
 				super.appendColumnArg(tableName, sb, fieldType, additionalArgs, statementsBefore, statementsAfter,
@@ -192,7 +193,7 @@ public class TableUtilsTest extends BaseCoreTest {
 		DatabaseConnection conn = createMock(DatabaseConnection.class);
 		expect(connectionSource.getReadWriteConnection("index")).andReturn(conn);
 		final CompiledStatement stmt = createMock(CompiledStatement.class);
-		expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(FieldType[].class), anyInt(),
+		expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(DbField[].class), anyInt(),
 				anyBoolean())).andAnswer(new IAnswer<CompiledStatement>() {
 					private int stmtC = 0;
 
@@ -214,7 +215,7 @@ public class TableUtilsTest extends BaseCoreTest {
 						}
 						stmtC++;
 						assertEquals(StatementType.EXECUTE, args[1]);
-						assertEquals(0, ((FieldType[]) args[2]).length);
+						assertEquals(0, ((DbField[]) args[2]).length);
 						return stmt;
 					}
 				}).anyTimes();
@@ -238,7 +239,7 @@ public class TableUtilsTest extends BaseCoreTest {
 		DatabaseConnection conn = createMock(DatabaseConnection.class);
 		expect(connectionSource.getReadWriteConnection("comboindex")).andReturn(conn);
 		final CompiledStatement stmt = createMock(CompiledStatement.class);
-		expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(FieldType[].class), anyInt(),
+		expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(DbField[].class), anyInt(),
 				anyBoolean())).andAnswer(new IAnswer<CompiledStatement>() {
 					private int stmtC = 0;
 
@@ -262,7 +263,7 @@ public class TableUtilsTest extends BaseCoreTest {
 						}
 						stmtC++;
 						assertEquals(StatementType.EXECUTE, args[1]);
-						assertEquals(0, ((FieldType[]) args[2]).length);
+						assertEquals(0, ((DbField[]) args[2]).length);
 						return stmt;
 					}
 				}).anyTimes();
@@ -286,7 +287,7 @@ public class TableUtilsTest extends BaseCoreTest {
 		DatabaseConnection conn = createMock(DatabaseConnection.class);
 		expect(connectionSource.getReadWriteConnection("uniqueindex")).andReturn(conn);
 		final CompiledStatement stmt = createMock(CompiledStatement.class);
-		expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(FieldType[].class), anyInt(),
+		expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(DbField[].class), anyInt(),
 				anyBoolean())).andAnswer(new IAnswer<CompiledStatement>() {
 					private int stmtC = 0;
 
@@ -309,7 +310,7 @@ public class TableUtilsTest extends BaseCoreTest {
 						}
 						stmtC++;
 						assertEquals(StatementType.EXECUTE, args[1]);
-						assertEquals(0, ((FieldType[]) args[2]).length);
+						assertEquals(0, ((DbField[]) args[2]).length);
 						return stmt;
 					}
 				}).anyTimes();
@@ -492,15 +493,15 @@ public class TableUtilsTest extends BaseCoreTest {
 		DatabaseResults results = null;
 		final AtomicInteger rowC = new AtomicInteger(1);
 		if (throwExecute) {
-			expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(FieldType[].class), anyInt(),
+			expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(DbField[].class), anyInt(),
 					anyBoolean())).andThrow(new SQLException("you asked us to!!"));
 		} else {
-			expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(FieldType[].class), anyInt(),
+			expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(DbField[].class), anyInt(),
 					anyBoolean())).andReturn(stmt);
 			expect(stmt.runExecute()).andReturn(rowN);
 			stmt.close();
 			if (queryAfter != null) {
-				expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(FieldType[].class),
+				expect(conn.compileStatement(isA(String.class), isA(StatementType.class), isA(DbField[].class),
 						anyInt(), anyBoolean())).andReturn(stmt);
 				results = createMock(DatabaseResults.class);
 				expect(results.first()).andReturn(false);

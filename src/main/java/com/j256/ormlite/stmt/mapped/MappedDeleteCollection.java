@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.table.TableInfo;
@@ -17,8 +17,8 @@ import com.j256.ormlite.table.TableInfo;
  */
 public class MappedDeleteCollection<T, ID> extends BaseMappedStatement<T, ID> {
 
-	private MappedDeleteCollection(TableInfo<T, ID> tableInfo, String statement, FieldType[] argFieldTypes) {
-		super(tableInfo, statement, argFieldTypes);
+	private MappedDeleteCollection(TableInfo<T, ID> tableInfo, String statement, DbField[] argDbFields) {
+		super(tableInfo, statement, argDbFields);
 	}
 
 	/**
@@ -30,7 +30,7 @@ public class MappedDeleteCollection<T, ID> extends BaseMappedStatement<T, ID> {
 		MappedDeleteCollection<T, ID> deleteCollection =
 				MappedDeleteCollection.build(databaseType, tableInfo, datas.size());
 		Object[] fieldObjects = new Object[datas.size()];
-		FieldType idField = tableInfo.getIdField();
+		DbField idField = tableInfo.getIdField();
 		int objC = 0;
 		for (T data : datas) {
 			fieldObjects[objC] = idField.extractJavaFieldToSqlArgValue(data);
@@ -48,7 +48,7 @@ public class MappedDeleteCollection<T, ID> extends BaseMappedStatement<T, ID> {
 		MappedDeleteCollection<T, ID> deleteCollection =
 				MappedDeleteCollection.build(databaseType, tableInfo, ids.size());
 		Object[] fieldObjects = new Object[ids.size()];
-		FieldType idField = tableInfo.getIdField();
+		DbField idField = tableInfo.getIdField();
 		int objC = 0;
 		for (ID id : ids) {
 			fieldObjects[objC] = idField.convertJavaFieldToSqlArgValue(id);
@@ -62,22 +62,22 @@ public class MappedDeleteCollection<T, ID> extends BaseMappedStatement<T, ID> {
 	 */
 	private static <T, ID> MappedDeleteCollection<T, ID> build(DatabaseType databaseType, TableInfo<T, ID> tableInfo,
 			int dataSize) throws SQLException {
-		FieldType idField = tableInfo.getIdField();
+		DbField idField = tableInfo.getIdField();
 		if (idField == null) {
 			throw new SQLException("Cannot delete " + tableInfo.getDataClass()
 					+ " because it doesn't have an id field defined");
 		}
 		StringBuilder sb = new StringBuilder(128);
 		appendTableName(databaseType, sb, "DELETE FROM ", tableInfo.getTableName());
-		FieldType[] argFieldTypes = new FieldType[dataSize];
-		appendWhereIds(databaseType, idField, sb, dataSize, argFieldTypes);
-		return new MappedDeleteCollection<T, ID>(tableInfo, sb.toString(), argFieldTypes);
+		DbField[] argDbFields = new DbField[dataSize];
+		appendWhereIds(databaseType, idField, sb, dataSize, argDbFields);
+		return new MappedDeleteCollection<T, ID>(tableInfo, sb.toString(), argDbFields);
 	}
 
 	private static <T, ID> int updateRows(DatabaseConnection databaseConnection, Class<T> clazz,
 			MappedDeleteCollection<T, ID> deleteCollection, Object[] args, ObjectCache objectCache) throws SQLException {
 		try {
-			int rowC = databaseConnection.delete(deleteCollection.statement, args, deleteCollection.argFieldTypes);
+			int rowC = databaseConnection.delete(deleteCollection.statement, args, deleteCollection.argDbFields);
 			if (rowC > 0 && objectCache != null) {
 				for (Object id : args) {
 					objectCache.remove(clazz, id);
@@ -95,8 +95,8 @@ public class MappedDeleteCollection<T, ID> extends BaseMappedStatement<T, ID> {
 		}
 	}
 
-	private static void appendWhereIds(DatabaseType databaseType, FieldType idField, StringBuilder sb, int numDatas,
-			FieldType[] fieldTypes) {
+	private static void appendWhereIds(DatabaseType databaseType, DbField idField, StringBuilder sb, int numDatas,
+									   DbField[] dbFields) {
 		sb.append("WHERE ");
 		databaseType.appendEscapedEntityName(sb, idField.getColumnName());
 		sb.append(" IN (");
@@ -108,8 +108,8 @@ public class MappedDeleteCollection<T, ID> extends BaseMappedStatement<T, ID> {
 				sb.append(',');
 			}
 			sb.append('?');
-			if (fieldTypes != null) {
-				fieldTypes[i] = idField;
+			if (dbFields != null) {
+				dbFields[i] = idField;
 			}
 		}
 		sb.append(") ");

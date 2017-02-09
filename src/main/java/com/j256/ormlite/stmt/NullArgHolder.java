@@ -1,6 +1,6 @@
 package com.j256.ormlite.stmt;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 
 /**
@@ -31,12 +31,12 @@ public class NullArgHolder implements ArgumentHolder {
 	}
 
 	@Override
-	public void setMetaInfo(FieldType fieldType) {
+	public void setMetaInfo(DbField dbField) {
 		// noop
 	}
 
 	@Override
-	public void setMetaInfo(String columnName, FieldType fieldType) {
+	public void setMetaInfo(String columnName, DbField dbField) {
 		// noop
 	}
 
@@ -52,7 +52,7 @@ public class NullArgHolder implements ArgumentHolder {
 	}
 
 	@Override
-	public FieldType getFieldType() {
+	public DbField getFieldType() {
 		return null;
 	}
 }

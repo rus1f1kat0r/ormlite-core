@@ -28,7 +28,7 @@ public class SelectArgTest extends BaseCoreStmtTest {
 	public void testSetNumber() throws Exception {
 		SelectArg selectArg = new SelectArg();
 		int val = 10;
-		selectArg.setMetaInfo("val", numberFieldType);
+		selectArg.setMetaInfo("val", numberDbField);
 		selectArg.setValue(val);
 		assertSame(val, selectArg.getSqlArgValue());
 	}
@@ -37,15 +37,15 @@ public class SelectArgTest extends BaseCoreStmtTest {
 	public void testGetColumnNameOk() {
 		SelectArg selectArg = new SelectArg();
 		String name = "fwewfwef";
-		selectArg.setMetaInfo(name, stringFieldType);
+		selectArg.setMetaInfo(name, stringDbField);
 		assertSame(name, selectArg.getColumnName());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetColumnNameTwice() {
 		SelectArg selectArg = new SelectArg();
-		selectArg.setMetaInfo("1", numberFieldType);
-		selectArg.setMetaInfo("2", numberFieldType);
+		selectArg.setMetaInfo("1", numberDbField);
+		selectArg.setMetaInfo("2", numberDbField);
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class SelectArgTest extends BaseCoreStmtTest {
 		assertTrue(selectArg.toString().contains("[unset]"));
 		Foo foo = new Foo();
 		selectArg.setValue(foo);
-		selectArg.setMetaInfo("id", foreignFieldType);
+		selectArg.setMetaInfo("id", foreignDbField);
 		assertTrue(selectArg + " wrong value", selectArg.toString().contains(Integer.toString(foo.id)));
 	}
 
@@ -79,7 +79,7 @@ public class SelectArgTest extends BaseCoreStmtTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testDoubleSet() {
 		SelectArg selectArg = new SelectArg();
-		selectArg.setMetaInfo("id", numberFieldType);
-		selectArg.setMetaInfo("id", stringFieldType);
+		selectArg.setMetaInfo("id", numberDbField);
+		selectArg.setMetaInfo("id", stringDbField);
 	}
 }

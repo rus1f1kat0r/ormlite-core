@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.stmt.ArgumentHolder;
 import com.j256.ormlite.stmt.Where;
 
@@ -15,8 +15,8 @@ import com.j256.ormlite.stmt.Where;
  */
 public class IsNotNull extends BaseComparison {
 
-	public IsNotNull(String columnName, FieldType fieldType) throws SQLException {
-		super(columnName, fieldType, null, false);
+	public IsNotNull(String columnName, DbField dbField) throws SQLException {
+		super(columnName, dbField, null, false);
 	}
 
 	@Override

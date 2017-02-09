@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.DatabaseResults;
@@ -36,22 +36,22 @@ public class BigDecimalStringType extends BaseDataType {
 	}
 
 	@Override
-	public Object parseDefaultString(FieldType fieldType, String defaultStr) throws SQLException {
+	public Object parseDefaultString(DbField dbField, String defaultStr) throws SQLException {
 		try {
 			return new BigDecimal(defaultStr).toString();
 		} catch (IllegalArgumentException e) {
-			throw SqlExceptionUtil.create("Problems with field " + fieldType + " parsing default BigDecimal string '"
+			throw SqlExceptionUtil.create("Problems with field " + dbField + " parsing default BigDecimal string '"
 					+ defaultStr + "'", e);
 		}
 	}
 
 	@Override
-	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
 		return results.getString(columnPos);
 	}
 
 	@Override
-	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) throws SQLException {
+	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) throws SQLException {
 		try {
 			return new BigDecimal((String) sqlArg);
 		} catch (IllegalArgumentException e) {
@@ -61,7 +61,7 @@ public class BigDecimalStringType extends BaseDataType {
 	}
 
 	@Override
-	public Object javaToSqlArg(FieldType fieldType, Object obj) {
+	public Object javaToSqlArg(DbField dbField, Object obj) {
 		BigDecimal bigInteger = (BigDecimal) obj;
 		return bigInteger.toString();
 	}

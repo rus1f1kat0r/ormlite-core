@@ -2,7 +2,7 @@ package com.j256.ormlite.field.types;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.support.DatabaseResults;
 
@@ -28,12 +28,12 @@ public class FloatObjectType extends BaseDataType {
 	}
 
 	@Override
-	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
 		return (Float) results.getFloat(columnPos);
 	}
 
 	@Override
-	public Object parseDefaultString(FieldType fieldType, String defaultStr) {
+	public Object parseDefaultString(DbField dbField, String defaultStr) {
 		return Float.parseFloat(defaultStr);
 	}
 

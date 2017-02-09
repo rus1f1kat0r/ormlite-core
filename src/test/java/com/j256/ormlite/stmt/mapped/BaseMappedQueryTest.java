@@ -18,6 +18,7 @@ import org.junit.Test;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.BaseCoreStmtTest;
 import com.j256.ormlite.stmt.QueryBuilder;
@@ -32,7 +33,7 @@ public class BaseMappedQueryTest extends BaseCoreStmtTest {
 		FieldType[] resultFieldTypes =
 				new FieldType[] { FieldType.createFieldType(connectionSource, tableName, field, Foo.class) };
 		BaseMappedQuery<Foo, Integer> baseMappedQuery = new BaseMappedQuery<Foo, Integer>(baseFooTableInfo,
-				"select * from " + tableName, new FieldType[0], resultFieldTypes) {
+				"select * from " + tableName, new DbField[0], resultFieldTypes) {
 		};
 		DatabaseResults results = createMock(DatabaseResults.class);
 		int colN = 1;
@@ -55,7 +56,7 @@ public class BaseMappedQueryTest extends BaseCoreStmtTest {
 		FieldType[] resultFieldTypes =
 				new FieldType[] { FieldType.createFieldType(connectionSource, tableName, field, Foo.class) };
 		BaseMappedQuery<Foo, Integer> baseMappedQuery = new BaseMappedQuery<Foo, Integer>(baseFooTableInfo,
-				"select * from " + tableName, new FieldType[0], resultFieldTypes) {
+				"select * from " + tableName, new DbField[0], resultFieldTypes) {
 		};
 		DatabaseResults results = createMock(DatabaseResults.class);
 		int colN = 1;

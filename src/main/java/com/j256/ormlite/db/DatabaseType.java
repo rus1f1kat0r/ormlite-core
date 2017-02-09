@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.j256.ormlite.field.DataPersister;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldConverter;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.support.ConnectionSource;
@@ -44,26 +45,26 @@ public interface DatabaseType {
 	 * executed before or afterwards depending on the configurations. The database can also add to the list of queries
 	 * that will be performed afterward to test portions of the config.
 	 */
-	public void appendColumnArg(String tableName, StringBuilder sb, FieldType fieldType, List<String> additionalArgs,
-			List<String> statementsBefore, List<String> statementsAfter, List<String> queriesAfter) throws SQLException;
+	public void appendColumnArg(String tableName, StringBuilder sb, DbField dbField, List<String> additionalArgs,
+								List<String> statementsBefore, List<String> statementsAfter, List<String> queriesAfter) throws SQLException;
 
 	/**
 	 * Appends information about primary key field(s) to the additional-args or other lists.
 	 */
-	public void addPrimaryKeySql(FieldType[] fieldTypes, List<String> additionalArgs, List<String> statementsBefore,
-			List<String> statementsAfter, List<String> queriesAfter) throws SQLException;
+	public void addPrimaryKeySql(DbField[] dbFields, List<String> additionalArgs, List<String> statementsBefore,
+								 List<String> statementsAfter, List<String> queriesAfter) throws SQLException;
 
 	/**
 	 * Appends information about unique field(s) to the additional-args or other lists.
 	 */
-	public void addUniqueComboSql(FieldType[] fieldTypes, List<String> additionalArgs, List<String> statementsBefore,
-			List<String> statementsAfter, List<String> queriesAfter) throws SQLException;
+	public void addUniqueComboSql(DbField[] dbFields, List<String> additionalArgs, List<String> statementsBefore,
+								  List<String> statementsAfter, List<String> queriesAfter) throws SQLException;
 
 	/**
 	 * Takes a {@link FieldType} and adds the necessary statements to the before and after lists necessary so that the
 	 * dropping of the table will succeed and will clear other associated sequences or other database artifacts
 	 */
-	public void dropColumnArg(FieldType fieldType, List<String> statementsBefore, List<String> statementsAfter);
+	public void dropColumnArg(DbField dbField, List<String> statementsBefore, List<String> statementsAfter);
 
 	/**
 	 * Add a entity-name word to the string builder wrapped in the proper characters to escape it. This avoids problems
@@ -80,7 +81,7 @@ public interface DatabaseType {
 	/**
 	 * Return the name of an ID sequence based on the tabelName and the fieldType of the id.
 	 */
-	public String generateIdSequenceName(String tableName, FieldType idFieldType);
+	public String generateIdSequenceName(String tableName, DbField idDbField);
 
 	/**
 	 * Return the prefix to put at the front of a SQL line to mark it as a comment.
@@ -100,13 +101,13 @@ public interface DatabaseType {
 	 * Return the DataPersister to associate with the DataType. This allows the database instance to convert a field as
 	 * necessary before it goes to the database.
 	 */
-	public DataPersister getDataPersister(DataPersister defaultPersister, FieldType fieldType);
+	public DataPersister getDataPersister(DataPersister defaultPersister, DbField dbField);
 
 	/**
 	 * Return the FieldConverter to associate with the DataType. This allows the database instance to convert a field as
 	 * necessary before it goes to the database.
 	 */
-	public FieldConverter getFieldConverter(DataPersister dataType, FieldType fieldType);
+	public FieldConverter getFieldConverter(DataPersister dataType, DbField dbField);
 
 	/**
 	 * Return true if the database supports the width parameter on VARCHAR fields.

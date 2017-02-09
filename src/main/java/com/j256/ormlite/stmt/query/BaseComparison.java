@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.stmt.ArgumentHolder;
 import com.j256.ormlite.stmt.ColumnArg;
 import com.j256.ormlite.stmt.SelectArg;
@@ -18,17 +18,17 @@ abstract class BaseComparison implements Comparison {
 
 	private static final String NUMBER_CHARACTERS = "0123456789.-+";
 	protected final String columnName;
-	protected final FieldType fieldType;
+	protected final DbField dbField;
 	private final Object value;
 
-	protected BaseComparison(String columnName, FieldType fieldType, Object value, boolean isComparison)
+	protected BaseComparison(String columnName, DbField dbField, Object value, boolean isComparison)
 			throws SQLException {
-		if (isComparison && fieldType != null && !fieldType.isComparable()) {
-			throw new SQLException("Field '" + columnName + "' is of data type " + fieldType.getDataPersister()
+		if (isComparison && dbField != null && !dbField.isComparable()) {
+			throw new SQLException("Field '" + columnName + "' is of data type " + dbField.getDataPersister()
 					+ " which can not be compared");
 		}
 		this.columnName = columnName;
-		this.fieldType = fieldType;
+		this.dbField = dbField;
 		this.value = value;
 	}
 
@@ -57,21 +57,21 @@ abstract class BaseComparison implements Comparison {
 	@Override
 	public void appendValue(DatabaseType databaseType, StringBuilder sb, List<ArgumentHolder> argList)
 			throws SQLException {
-		appendArgOrValue(databaseType, fieldType, sb, argList, value);
+		appendArgOrValue(databaseType, dbField, sb, argList, value);
 	}
 
 	/**
 	 * Append to the string builder either a {@link ArgumentHolder} argument or a value object.
 	 */
-	protected void appendArgOrValue(DatabaseType databaseType, FieldType fieldType, StringBuilder sb,
-			List<ArgumentHolder> argList, Object argOrValue) throws SQLException {
+	protected void appendArgOrValue(DatabaseType databaseType, DbField dbField, StringBuilder sb,
+									List<ArgumentHolder> argList, Object argOrValue) throws SQLException {
 		boolean appendSpace = true;
 		if (argOrValue == null) {
-			throw new SQLException("argument for '" + fieldType.getFieldName() + "' is null");
+			throw new SQLException("argument for '" + dbField.getFieldName() + "' is null");
 		} else if (argOrValue instanceof ArgumentHolder) {
 			sb.append('?');
 			ArgumentHolder argHolder = (ArgumentHolder) argOrValue;
-			argHolder.setMetaInfo(columnName, fieldType);
+			argHolder.setMetaInfo(columnName, dbField);
 			argList.add(argHolder);
 		} else if (argOrValue instanceof ColumnArg) {
 			ColumnArg columnArg = (ColumnArg) argOrValue;
@@ -81,34 +81,34 @@ abstract class BaseComparison implements Comparison {
 				sb.append('.');
 			}
 			databaseType.appendEscapedEntityName(sb, columnArg.getColumnName());
-		} else if (fieldType.isArgumentHolderRequired()) {
+		} else if (dbField.isArgumentHolderRequired()) {
 			sb.append('?');
 			ArgumentHolder argHolder = new SelectArg();
-			argHolder.setMetaInfo(columnName, fieldType);
+			argHolder.setMetaInfo(columnName, dbField);
 			// conversion is done when the getValue() is called
 			argHolder.setValue(argOrValue);
 			argList.add(argHolder);
-		} else if (fieldType.isForeign() && fieldType.getType().isAssignableFrom(argOrValue.getClass())) {
+		} else if (dbField.isForeign() && dbField.getType().isAssignableFrom(argOrValue.getClass())) {
 			/*
 			 * If we have a foreign field and our argument is an instance of the foreign object (i.e. not its id), then
 			 * we need to extract the id. We allow super-classes of the field but not sub-classes.
 			 */
-			FieldType idFieldType = fieldType.getForeignIdField();
-			appendArgOrValue(databaseType, idFieldType, sb, argList, idFieldType.extractJavaFieldValue(argOrValue));
+			DbField idDbField = dbField.getForeignIdField();
+			appendArgOrValue(databaseType, idDbField, sb, argList, idDbField.extractJavaFieldValue(argOrValue));
 			// no need for the space since it was done in the recursion
 			appendSpace = false;
-		} else if (fieldType.isEscapedValue()) {
-			databaseType.appendEscapedWord(sb, fieldType.convertJavaFieldToSqlArgValue(argOrValue).toString());
-		} else if (fieldType.isForeign()) {
+		} else if (dbField.isEscapedValue()) {
+			databaseType.appendEscapedWord(sb, dbField.convertJavaFieldToSqlArgValue(argOrValue).toString());
+		} else if (dbField.isForeign()) {
 			/*
 			 * I'm not entirely sure this is correct. This is trying to protect against someone trying to pass an object
 			 * into a comparison with a foreign field. Typically if they pass the same field type, then ORMLite will
 			 * extract the ID of the foreign.
 			 */
-			String value = fieldType.convertJavaFieldToSqlArgValue(argOrValue).toString();
+			String value = dbField.convertJavaFieldToSqlArgValue(argOrValue).toString();
 			if (value.length() > 0) {
 				if (NUMBER_CHARACTERS.indexOf(value.charAt(0)) < 0) {
-					throw new SQLException("Foreign field " + fieldType
+					throw new SQLException("Foreign field " + dbField
 							+ " does not seem to be producing a numerical value '" + value
 							+ "'. Maybe you are passing the wrong object to comparison: " + this);
 				}
@@ -116,7 +116,7 @@ abstract class BaseComparison implements Comparison {
 			sb.append(value);
 		} else {
 			// numbers can't have quotes around them in derby
-			sb.append(fieldType.convertJavaFieldToSqlArgValue(argOrValue));
+			sb.append(dbField.convertJavaFieldToSqlArgValue(argOrValue));
 		}
 		if (appendSpace) {
 			sb.append(' ');

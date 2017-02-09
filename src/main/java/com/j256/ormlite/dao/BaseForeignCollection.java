@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.misc.IOUtils;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -28,17 +28,17 @@ public abstract class BaseForeignCollection<T, ID> implements ForeignCollection<
 	private static final long serialVersionUID = -5158840898186237589L;
 
 	protected transient final Dao<T, ID> dao;
-	private transient final FieldType foreignFieldType;
+	private transient final DbField foreignDbField;
 	private transient final Object parentId;
 	private transient PreparedQuery<T> preparedQuery;
 	private transient final String orderColumn;
 	private transient final boolean orderAscending;
 	private transient final Object parent;
 
-	protected BaseForeignCollection(Dao<T, ID> dao, Object parent, Object parentId, FieldType foreignFieldType,
+	protected BaseForeignCollection(Dao<T, ID> dao, Object parent, Object parentId, DbField foreignDbField,
 			String orderColumn, boolean orderAscending) {
 		this.dao = dao;
-		this.foreignFieldType = foreignFieldType;
+		this.foreignDbField = foreignDbField;
 		this.parentId = parentId;
 		this.orderColumn = orderColumn;
 		this.orderAscending = orderAscending;
@@ -181,7 +181,7 @@ public abstract class BaseForeignCollection<T, ID> implements ForeignCollection<
 			if (orderColumn != null) {
 				qb.orderBy(orderColumn, orderAscending);
 			}
-			preparedQuery = qb.where().eq(foreignFieldType.getColumnName(), fieldArg).prepare();
+			preparedQuery = qb.where().eq(foreignDbField.getColumnName(), fieldArg).prepare();
 			if (preparedQuery instanceof MappedPreparedStmt) {
 				@SuppressWarnings("unchecked")
 				MappedPreparedStmt<T, Object> mappedStmt = ((MappedPreparedStmt<T, Object>) preparedQuery);
@@ -195,8 +195,8 @@ public abstract class BaseForeignCollection<T, ID> implements ForeignCollection<
 		if (dao == null) {
 			return false;
 		}
-		if (parent != null && foreignFieldType.getFieldValueIfNotDefault(data) == null) {
-			foreignFieldType.assignField(data, parent, true, null);
+		if (parent != null && foreignDbField.getFieldValueIfNotDefault(data) == null) {
+			foreignDbField.assignField(data, parent, true, null);
 		}
 		dao.create(data);
 		return true;

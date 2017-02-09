@@ -16,6 +16,7 @@ import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +65,8 @@ public class RuntimeExceptionDaoTest extends BaseCoreTest {
 
 			// coverage magic
 			if (daoMethod.getName().equals("$VRi") || daoMethod.getName().equals("spliterator") /* java 8 method */
-					|| daoMethod.getName().equals("forEach") /* java 8 method */) {
+					|| daoMethod.getName().equals("forEach") /* java 8 method */
+					|| daoMethod.toString().startsWith("public default")) {
 				continue;
 			}
 

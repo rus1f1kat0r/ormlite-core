@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.misc.IOUtils;
 import com.j256.ormlite.misc.SqlExceptionUtil;
@@ -44,17 +44,17 @@ public class SerializableType extends BaseDataType {
 	}
 
 	@Override
-	public Object parseDefaultString(FieldType fieldType, String defaultStr) throws SQLException {
+	public Object parseDefaultString(DbField dbField, String defaultStr) throws SQLException {
 		throw new SQLException("Default values for serializable types are not supported");
 	}
 
 	@Override
-	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
 		return results.getBytes(columnPos);
 	}
 
 	@Override
-	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) throws SQLException {
+	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) throws SQLException {
 		byte[] bytes = (byte[]) sqlArg;
 		ObjectInputStream objInStream = null;
 		try {
@@ -70,7 +70,7 @@ public class SerializableType extends BaseDataType {
 	}
 
 	@Override
-	public Object javaToSqlArg(FieldType fieldType, Object obj) throws SQLException {
+	public Object javaToSqlArg(DbField dbField, Object obj) throws SQLException {
 		ObjectOutputStream objOutStream = null;
 		try {
 			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -114,7 +114,7 @@ public class SerializableType extends BaseDataType {
 	}
 
 	@Override
-	public Object resultStringToJava(FieldType fieldType, String stringValue, int columnPos) throws SQLException {
+	public Object resultStringToJava(DbField dbField, String stringValue, int columnPos) throws SQLException {
 		throw new SQLException("Serializable type cannot be converted from string to Java");
 	}
 

@@ -56,7 +56,7 @@ public class EnumStringTypeTest extends BaseTypeTest {
 		DatabaseConnection conn = connectionSource.getReadOnlyConnection(TABLE_NAME);
 		CompiledStatement stmt = null;
 		try {
-			stmt = conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, noFieldTypes,
+			stmt = conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, NO_DB_FIELDs,
 					DatabaseConnection.DEFAULT_RESULT_FLAGS, true);
 			DatabaseResults results = stmt.runQuery(null);
 			assertTrue(results.next());

@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.misc.BaseDaoEnabled;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.stmt.DeleteBuilder;
@@ -201,8 +201,8 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 
 				try {
 					// config our fields which may go recursive
-					for (FieldType fieldType : dao.getTableInfo().getFieldTypes()) {
-						fieldType.configDaoInformation(connectionSource, dao.getDataClass());
+					for (DbField dbField : dao.getTableInfo().getFieldTypes()) {
+						dbField.configDaoInformation(connectionSource, dao.getDataClass());
 					}
 				} catch (SQLException e) {
 					// unregister the DAO we just pre-registered
@@ -730,11 +730,11 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 	@Override
 	public boolean objectsEqual(T data1, T data2) throws SQLException {
 		checkForInitialized();
-		for (FieldType fieldType : tableInfo.getFieldTypes()) {
-			Object fieldObj1 = fieldType.extractJavaFieldValue(data1);
-			Object fieldObj2 = fieldType.extractJavaFieldValue(data2);
+		for (DbField dbField : tableInfo.getFieldTypes()) {
+			Object fieldObj1 = dbField.extractJavaFieldValue(data1);
+			Object fieldObj2 = dbField.extractJavaFieldValue(data2);
 			// we can't just do fieldObj1.equals(fieldObj2) because of byte[].equals()
-			if (!fieldType.getDataPersister().dataIsEqual(fieldObj1, fieldObj2)) {
+			if (!dbField.getDataPersister().dataIsEqual(fieldObj1, fieldObj2)) {
 				return false;
 			}
 		}
@@ -744,7 +744,7 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 	@Override
 	public ID extractId(T data) throws SQLException {
 		checkForInitialized();
-		FieldType idField = tableInfo.getIdField();
+		DbField idField = tableInfo.getIdField();
 		if (idField == null) {
 			throw new SQLException("Class " + dataClass + " does not have an id field");
 		}
@@ -759,11 +759,11 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 	}
 
 	@Override
-	public FieldType findForeignFieldType(Class<?> clazz) {
+	public DbField findForeignFieldType(Class<?> clazz) {
 		checkForInitialized();
-		for (FieldType fieldType : tableInfo.getFieldTypes()) {
-			if (fieldType.getType() == clazz) {
-				return fieldType;
+		for (DbField dbField : tableInfo.getFieldTypes()) {
+			if (dbField.getType() == clazz) {
+				return dbField;
 			}
 		}
 		return null;
@@ -1070,12 +1070,12 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 		} else {
 			id = extractId(parent);
 		}
-		for (FieldType fieldType : tableInfo.getFieldTypes()) {
-			if (fieldType.getColumnName().equals(fieldName)) {
+		for (DbField dbField : tableInfo.getFieldTypes()) {
+			if (dbField.getColumnName().equals(fieldName)) {
 				@SuppressWarnings("unchecked")
-				ForeignCollection<FT> collection = (ForeignCollection<FT>) fieldType.buildForeignCollection(parent, id);
+				ForeignCollection<FT> collection = (ForeignCollection<FT>) dbField.buildForeignCollection(parent, id);
 				if (parent != null) {
-					fieldType.assignField(parent, collection, true, null);
+					dbField.assignField(parent, collection, true, null);
 				}
 				return collection;
 			}
@@ -1108,13 +1108,13 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 		QueryBuilder<T, ID> qb = queryBuilder();
 		Where<T, ID> where = qb.where();
 		int fieldC = 0;
-		for (FieldType fieldType : tableInfo.getFieldTypes()) {
-			Object fieldValue = fieldType.getFieldValueIfNotDefault(matchObj);
+		for (DbField dbField : tableInfo.getFieldTypes()) {
+			Object fieldValue = dbField.getFieldValueIfNotDefault(matchObj);
 			if (fieldValue != null) {
 				if (useArgs) {
 					fieldValue = new SelectArg(fieldValue);
 				}
-				where.eq(fieldType.getColumnName(), fieldValue);
+				where.eq(dbField.getColumnName(), fieldValue);
 				fieldC++;
 			}
 		}

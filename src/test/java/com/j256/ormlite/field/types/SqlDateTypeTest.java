@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.table.DatabaseTable;
@@ -58,10 +59,10 @@ public class SqlDateTypeTest extends BaseTypeTest {
 
 	@Test(expected = SQLException.class)
 	public void testSqlDateParseInvalid() throws Exception {
-		FieldType fieldType =
+		DbField dbField =
 				FieldType.createFieldType(connectionSource, TABLE_NAME, LocalDate.class.getDeclaredField(DATE_COLUMN),
 						LocalDate.class);
-		dataType.getDataPersister().parseDefaultString(fieldType, "not valid date string");
+		dataType.getDataPersister().parseDefaultString(dbField, "not valid date string");
 	}
 
 	@Test
