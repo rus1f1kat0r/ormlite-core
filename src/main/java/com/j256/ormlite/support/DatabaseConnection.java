@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 
 import com.j256.ormlite.dao.ObjectCache;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.GenericRowMapper;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 
@@ -73,7 +73,7 @@ public interface DatabaseConnection extends Closeable {
 	public int executeStatement(String statementStr, int resultFlags) throws SQLException;
 
 	/**
-	 * Like compileStatement(String, StatementType, FieldType[]) except the caller can specify the result flags.
+	 * Like compileStatement(String, StatementType, ReflectiveFieldType[]) except the caller can specify the result flags.
 	 * 
 	 * @param resultFlags
 	 *            Allows specification of some result flags. This is dependent on the backend and database type. Set to
@@ -81,7 +81,7 @@ public interface DatabaseConnection extends Closeable {
 	 * @param cacheStore
 	 *            Cache can store results from this statement.
 	 */
-	public CompiledStatement compileStatement(String statement, StatementType type, DbField[] argDbFields,
+	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
 			int resultFlags, boolean cacheStore) throws SQLException;
 
 	/**
@@ -98,7 +98,7 @@ public interface DatabaseConnection extends Closeable {
 	 *            The holder that gets set with the generated key value which may be null.
 	 * @return The number of rows affected by the update. With some database types, this value may be invalid.
 	 */
-	public int insert(String statement, Object[] args, DbField[] argfieldDbs, GeneratedKeyHolder keyHolder)
+	public int insert(String statement, Object[] args, FieldType[] argfieldDbs, GeneratedKeyHolder keyHolder)
 			throws SQLException;
 
 	/**
@@ -112,7 +112,7 @@ public interface DatabaseConnection extends Closeable {
 	 *            Field types of the arguments.
 	 * @return The number of rows affected by the update. With some database types, this value may be invalid.
 	 */
-	public int update(String statement, Object[] args, DbField[] argfieldDbs) throws SQLException;
+	public int update(String statement, Object[] args, FieldType[] argfieldDbs) throws SQLException;
 
 	/**
 	 * Perform a SQL delete with the associated SQL statement, arguments, and types.
@@ -125,7 +125,7 @@ public interface DatabaseConnection extends Closeable {
 	 *            Field types of the arguments.
 	 * @return The number of rows affected by the update. With some database types, this value may be invalid.
 	 */
-	public int delete(String statement, Object[] args, DbField[] argfieldDbs) throws SQLException;
+	public int delete(String statement, Object[] args, FieldType[] argfieldDbs) throws SQLException;
 
 	/**
 	 * Perform a SQL query with the associated SQL statement, arguments, and types and returns a single result.
@@ -143,7 +143,7 @@ public interface DatabaseConnection extends Closeable {
 	 * @return The first data item returned by the query which can be cast to T, null if none, the object
 	 *         {@link #MORE_THAN_ONE} if more than one result was found.
 	 */
-	public <T> Object queryForOne(String statement, Object[] args, DbField[] argfieldDbs,
+	public <T> Object queryForOne(String statement, Object[] args, FieldType[] argfieldDbs,
 			GenericRowMapper<T> rowMapper, ObjectCache objectCache) throws SQLException;
 
 	/**
@@ -161,10 +161,10 @@ public interface DatabaseConnection extends Closeable {
 	 *            SQL statement to use for the query.
 	 * @param args
 	 *            Arguments to pass into the query.
-	 * @param argDbFields
+	 * @param argFieldTypes
 	 *            Field types that correspond to the args.
 	 */
-	public long queryForLong(String statement, Object[] args, DbField[] argDbFields) throws SQLException;
+	public long queryForLong(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException;
 
 	/**
 	 * Close the connection to the database but swallow any exceptions.

@@ -7,7 +7,7 @@ import java.util.Locale;
 
 import com.j256.ormlite.field.BaseFieldConverter;
 import com.j256.ormlite.field.DataPersister;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.FieldConverter;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.misc.SqlExceptionUtil;
@@ -56,14 +56,14 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	}
 
 	@Override
-	public void appendColumnArg(String tableName, StringBuilder sb, DbField dbField, List<String> additionalArgs,
+	public void appendColumnArg(String tableName, StringBuilder sb, FieldType fieldType, List<String> additionalArgs,
 								List<String> statementsBefore, List<String> statementsAfter, List<String> queriesAfter)
 					throws SQLException {
-		appendEscapedEntityName(sb, dbField.getColumnName());
+		appendEscapedEntityName(sb, fieldType.getColumnName());
 		sb.append(' ');
-		DataPersister dataPersister = dbField.getDataPersister();
+		DataPersister dataPersister = fieldType.getDataPersister();
 		// first try the per-field width
-		int fieldWidth = dbField.getWidth();
+		int fieldWidth = fieldType.getWidth();
 		if (fieldWidth == 0) {
 			// next try the per-data-type width
 			fieldWidth = dataPersister.getDefaultWidth();
@@ -71,63 +71,63 @@ public abstract class BaseDatabaseType implements DatabaseType {
 		switch (dataPersister.getSqlType()) {
 
 			case STRING:
-				appendStringType(sb, dbField, fieldWidth);
+				appendStringType(sb, fieldType, fieldWidth);
 				break;
 
 			case LONG_STRING:
-				appendLongStringType(sb, dbField, fieldWidth);
+				appendLongStringType(sb, fieldType, fieldWidth);
 				break;
 
 			case BOOLEAN:
-				appendBooleanType(sb, dbField, fieldWidth);
+				appendBooleanType(sb, fieldType, fieldWidth);
 				break;
 
 			case DATE:
-				appendDateType(sb, dbField, fieldWidth);
+				appendDateType(sb, fieldType, fieldWidth);
 				break;
 
 			case CHAR:
-				appendCharType(sb, dbField, fieldWidth);
+				appendCharType(sb, fieldType, fieldWidth);
 				break;
 
 			case BYTE:
-				appendByteType(sb, dbField, fieldWidth);
+				appendByteType(sb, fieldType, fieldWidth);
 				break;
 
 			case BYTE_ARRAY:
-				appendByteArrayType(sb, dbField, fieldWidth);
+				appendByteArrayType(sb, fieldType, fieldWidth);
 				break;
 
 			case SHORT:
-				appendShortType(sb, dbField, fieldWidth);
+				appendShortType(sb, fieldType, fieldWidth);
 				break;
 
 			case INTEGER:
-				appendIntegerType(sb, dbField, fieldWidth);
+				appendIntegerType(sb, fieldType, fieldWidth);
 				break;
 
 			case LONG:
-				appendLongType(sb, dbField, fieldWidth);
+				appendLongType(sb, fieldType, fieldWidth);
 				break;
 
 			case FLOAT:
-				appendFloatType(sb, dbField, fieldWidth);
+				appendFloatType(sb, fieldType, fieldWidth);
 				break;
 
 			case DOUBLE:
-				appendDoubleType(sb, dbField, fieldWidth);
+				appendDoubleType(sb, fieldType, fieldWidth);
 				break;
 
 			case SERIALIZABLE:
-				appendSerializableType(sb, dbField, fieldWidth);
+				appendSerializableType(sb, fieldType, fieldWidth);
 				break;
 
 			case BIG_DECIMAL:
-				appendBigDecimalNumericType(sb, dbField, fieldWidth);
+				appendBigDecimalNumericType(sb, fieldType, fieldWidth);
 				break;
 
 			case UUID:
-				appendUuidNativeType(sb, dbField, fieldWidth);
+				appendUuidNativeType(sb, fieldType, fieldWidth);
 				break;
 
 			case OTHER:
@@ -148,29 +148,29 @@ public abstract class BaseDatabaseType implements DatabaseType {
 		 * NOTE: the configure id methods must be in this order since isGeneratedIdSequence is also isGeneratedId and
 		 * isId. isGeneratedId is also isId.
 		 */
-		if (dbField.isGeneratedIdSequence() && !dbField.isSelfGeneratedId()) {
-			configureGeneratedIdSequence(sb, dbField, statementsBefore, additionalArgs, queriesAfter);
-		} else if (dbField.isGeneratedId() && !dbField.isSelfGeneratedId()) {
-			configureGeneratedId(tableName, sb, dbField, statementsBefore, statementsAfter, additionalArgs,
+		if (fieldType.isGeneratedIdSequence() && !fieldType.isSelfGeneratedId()) {
+			configureGeneratedIdSequence(sb, fieldType, statementsBefore, additionalArgs, queriesAfter);
+		} else if (fieldType.isGeneratedId() && !fieldType.isSelfGeneratedId()) {
+			configureGeneratedId(tableName, sb, fieldType, statementsBefore, statementsAfter, additionalArgs,
 					queriesAfter);
-		} else if (dbField.isId()) {
-			configureId(sb, dbField, statementsBefore, additionalArgs, queriesAfter);
+		} else if (fieldType.isId()) {
+			configureId(sb, fieldType, statementsBefore, additionalArgs, queriesAfter);
 		}
 		// if we have a generated-id then neither the not-null nor the default make sense and cause syntax errors
-		if (!dbField.isGeneratedId()) {
-			Object defaultValue = dbField.getDefaultValue();
+		if (!fieldType.isGeneratedId()) {
+			Object defaultValue = fieldType.getDefaultValue();
 			if (defaultValue != null) {
 				sb.append("DEFAULT ");
-				appendDefaultValue(sb, dbField, defaultValue);
+				appendDefaultValue(sb, fieldType, defaultValue);
 				sb.append(' ');
 			}
-			if (dbField.isCanBeNull()) {
-				appendCanBeNull(sb, dbField);
+			if (fieldType.isCanBeNull()) {
+				appendCanBeNull(sb, fieldType);
 			} else {
 				sb.append("NOT NULL ");
 			}
-			if (dbField.isUnique()) {
-				addSingleUnique(sb, dbField, additionalArgs, statementsAfter);
+			if (fieldType.isUnique()) {
+				addSingleUnique(sb, fieldType, additionalArgs, statementsAfter);
 			}
 		}
 	}
@@ -178,7 +178,7 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	/**
 	 * Output the SQL type for a Java String.
 	 */
-	protected void appendStringType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendStringType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		if (isVarcharFieldWidthSupported()) {
 			sb.append("VARCHAR(").append(fieldWidth).append(')');
 		} else {
@@ -190,106 +190,106 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	 * Output the SQL type for a Java UUID. This is used to support specific sub-class database types which support the
 	 * UUID type.
 	 */
-	protected void appendUuidNativeType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendUuidNativeType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		throw new UnsupportedOperationException("UUID is not supported by this database type");
 	}
 
 	/**
 	 * Output the SQL type for a Java Long String.
 	 */
-	protected void appendLongStringType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendLongStringType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("TEXT");
 	}
 
 	/**
 	 * Output the SQL type for a Java Date.
 	 */
-	protected void appendDateType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendDateType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("TIMESTAMP");
 	}
 
 	/**
 	 * Output the SQL type for a Java boolean.
 	 */
-	protected void appendBooleanType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendBooleanType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("BOOLEAN");
 	}
 
 	/**
 	 * Output the SQL type for a Java char.
 	 */
-	protected void appendCharType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendCharType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("CHAR");
 	}
 
 	/**
 	 * Output the SQL type for a Java byte.
 	 */
-	protected void appendByteType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendByteType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("TINYINT");
 	}
 
 	/**
 	 * Output the SQL type for a Java short.
 	 */
-	protected void appendShortType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendShortType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("SMALLINT");
 	}
 
 	/**
 	 * Output the SQL type for a Java integer.
 	 */
-	private void appendIntegerType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	private void appendIntegerType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("INTEGER");
 	}
 
 	/**
 	 * Output the SQL type for a Java long.
 	 */
-	protected void appendLongType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendLongType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("BIGINT");
 	}
 
 	/**
 	 * Output the SQL type for a Java float.
 	 */
-	private void appendFloatType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	private void appendFloatType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("FLOAT");
 	}
 
 	/**
 	 * Output the SQL type for a Java double.
 	 */
-	private void appendDoubleType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	private void appendDoubleType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("DOUBLE PRECISION");
 	}
 
 	/**
 	 * Output the SQL type for either a serialized Java object or a byte[].
 	 */
-	protected void appendByteArrayType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendByteArrayType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("BLOB");
 	}
 
 	/**
 	 * Output the SQL type for a serialized Java object.
 	 */
-	protected void appendSerializableType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendSerializableType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("BLOB");
 	}
 
 	/**
 	 * Output the SQL type for a BigDecimal object.
 	 */
-	protected void appendBigDecimalNumericType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendBigDecimalNumericType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		sb.append("NUMERIC");
 	}
 
 	/**
 	 * Output the SQL type for the default value for the type.
 	 */
-	private void appendDefaultValue(StringBuilder sb, DbField dbField, Object defaultValue) {
-		if (dbField.isEscapedDefaultValue()) {
+	private void appendDefaultValue(StringBuilder sb, FieldType fieldType, Object defaultValue) {
+		if (fieldType.isEscapedDefaultValue()) {
 			appendEscapedWord(sb, defaultValue.toString());
 		} else {
 			sb.append(defaultValue);
@@ -302,10 +302,10 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	 *
 	 * NOTE: Only one of configureGeneratedIdSequence, configureGeneratedId, or configureId will be called.
 	 */
-	protected void configureGeneratedIdSequence(StringBuilder sb, DbField dbField, List<String> statementsBefore,
+	protected void configureGeneratedIdSequence(StringBuilder sb, FieldType fieldType, List<String> statementsBefore,
 												List<String> additionalArgs, List<String> queriesAfter) throws SQLException {
 		throw new SQLException(
-				"GeneratedIdSequence is not supported by database " + getDatabaseName() + " for field " + dbField);
+				"GeneratedIdSequence is not supported by database " + getDatabaseName() + " for field " + fieldType);
 	}
 
 	/**
@@ -314,11 +314,11 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	 *
 	 * NOTE: Only one of configureGeneratedIdSequence, configureGeneratedId, or configureId will be called.
 	 */
-	protected void configureGeneratedId(String tableName, StringBuilder sb, DbField dbField,
+	protected void configureGeneratedId(String tableName, StringBuilder sb, FieldType fieldType,
 			List<String> statementsBefore, List<String> statementsAfter, List<String> additionalArgs,
 			List<String> queriesAfter) {
 		throw new IllegalStateException(
-				"GeneratedId is not supported by database " + getDatabaseName() + " for field " + dbField);
+				"GeneratedId is not supported by database " + getDatabaseName() + " for field " + fieldType);
 	}
 
 	/**
@@ -327,26 +327,26 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	 *
 	 * NOTE: Only one of configureGeneratedIdSequence, configureGeneratedId, or configureId will be called.
 	 */
-	protected void configureId(StringBuilder sb, DbField dbField, List<String> statementsBefore,
+	protected void configureId(StringBuilder sb, FieldType fieldType, List<String> statementsBefore,
 							   List<String> additionalArgs, List<String> queriesAfter) {
 		// default is noop since we do it at the end in appendPrimaryKeys()
 	}
 
 	@Override
-	public void addPrimaryKeySql(DbField[] dbFields, List<String> additionalArgs, List<String> statementsBefore,
+	public void addPrimaryKeySql(FieldType[] fieldTypes, List<String> additionalArgs, List<String> statementsBefore,
 								 List<String> statementsAfter, List<String> queriesAfter) {
 		StringBuilder sb = null;
-		for (DbField dbField : dbFields) {
-			if (dbField.isGeneratedId() && !generatedIdSqlAtEnd() && !dbField.isSelfGeneratedId()) {
+		for (FieldType fieldType : fieldTypes) {
+			if (fieldType.isGeneratedId() && !generatedIdSqlAtEnd() && !fieldType.isSelfGeneratedId()) {
 				// don't add anything
-			} else if (dbField.isId()) {
+			} else if (fieldType.isId()) {
 				if (sb == null) {
 					sb = new StringBuilder(48);
 					sb.append("PRIMARY KEY (");
 				} else {
 					sb.append(',');
 				}
-				appendEscapedEntityName(sb, dbField.getColumnName());
+				appendEscapedEntityName(sb, fieldType.getColumnName());
 			}
 		}
 		if (sb != null) {
@@ -364,18 +364,18 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	}
 
 	@Override
-	public void addUniqueComboSql(DbField[] dbFields, List<String> additionalArgs, List<String> statementsBefore,
+	public void addUniqueComboSql(FieldType[] fieldTypes, List<String> additionalArgs, List<String> statementsBefore,
 								  List<String> statementsAfter, List<String> queriesAfter) {
 		StringBuilder sb = null;
-		for (DbField dbField : dbFields) {
-			if (dbField.isUniqueCombo()) {
+		for (FieldType fieldType : fieldTypes) {
+			if (fieldType.isUniqueCombo()) {
 				if (sb == null) {
 					sb = new StringBuilder(48);
 					sb.append("UNIQUE (");
 				} else {
 					sb.append(',');
 				}
-				appendEscapedEntityName(sb, dbField.getColumnName());
+				appendEscapedEntityName(sb, fieldType.getColumnName());
 			}
 		}
 		if (sb != null) {
@@ -385,7 +385,7 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	}
 
 	@Override
-	public void dropColumnArg(DbField dbField, List<String> statementsBefore, List<String> statementsAfter) {
+	public void dropColumnArg(FieldType fieldType, List<String> statementsBefore, List<String> statementsAfter) {
 		// by default this is a noop
 	}
 
@@ -409,7 +409,7 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	}
 
 	@Override
-	public String generateIdSequenceName(String tableName, DbField idDbField) {
+	public String generateIdSequenceName(String tableName, FieldType idFieldType) {
 		String name = tableName + DEFAULT_SEQUENCE_SUFFIX;
 		if (isEntityNamesMustBeUpCase()) {
 			return upCaseEntityName(name);
@@ -424,13 +424,13 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	}
 
 	@Override
-	public DataPersister getDataPersister(DataPersister defaultPersister, DbField dbField) {
+	public DataPersister getDataPersister(DataPersister defaultPersister, FieldType fieldType) {
 		// default is noop
 		return defaultPersister;
 	}
 
 	@Override
-	public FieldConverter getFieldConverter(DataPersister dataPersister, DbField dbField) {
+	public FieldConverter getFieldConverter(DataPersister dataPersister, FieldType fieldType) {
 		// default is to use the dataPersister itself
 		return dataPersister;
 	}
@@ -571,18 +571,18 @@ public abstract class BaseDatabaseType implements DatabaseType {
 	 * noop. This is necessary because MySQL has a auto default value for the TIMESTAMP type that required a default
 	 * value otherwise it would stick in the current date automagically.
 	 */
-	private void appendCanBeNull(StringBuilder sb, DbField dbField) {
+	private void appendCanBeNull(StringBuilder sb, FieldType fieldType) {
 		// default is a noop
 	}
 
 	/**
 	 * Add SQL to handle a unique=true field. THis is not for uniqueCombo=true.
 	 */
-	private void addSingleUnique(StringBuilder sb, DbField dbField, List<String> additionalArgs,
+	private void addSingleUnique(StringBuilder sb, FieldType fieldType, List<String> additionalArgs,
 								 List<String> statementsAfter) {
 		StringBuilder alterSb = new StringBuilder();
 		alterSb.append(" UNIQUE (");
-		appendEscapedEntityName(alterSb, dbField.getColumnName());
+		appendEscapedEntityName(alterSb, fieldType.getColumnName());
 		alterSb.append(')');
 		additionalArgs.add(alterSb.toString());
 	}
@@ -597,31 +597,31 @@ public abstract class BaseDatabaseType implements DatabaseType {
 		}
 
 		@Override
-		public Object parseDefaultString(DbField dbField, String defaultStr) {
+		public Object parseDefaultString(FieldType fieldType, String defaultStr) {
 			boolean bool = Boolean.parseBoolean(defaultStr);
 			return (bool ? Byte.valueOf((byte) 1) : Byte.valueOf((byte) 0));
 		}
 
 		@Override
-		public Object javaToSqlArg(DbField dbField, Object obj) {
+		public Object javaToSqlArg(FieldType fieldType, Object obj) {
 			Boolean bool = (Boolean) obj;
 			return (bool ? Byte.valueOf((byte) 1) : Byte.valueOf((byte) 0));
 		}
 
 		@Override
-		public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
+		public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 			return results.getByte(columnPos);
 		}
 
 		@Override
-		public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) {
+		public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {
 			byte arg = (Byte) sqlArg;
 			return (arg == 1 ? (Boolean) true : (Boolean) false);
 		}
 
 		@Override
-		public Object resultStringToJava(DbField dbField, String stringValue, int columnPos) {
-			return sqlArgToJava(dbField, Byte.parseByte(stringValue), columnPos);
+		public Object resultStringToJava(FieldType fieldType, String stringValue, int columnPos) {
+			return sqlArgToJava(fieldType, Byte.parseByte(stringValue), columnPos);
 		}
 	}
 }

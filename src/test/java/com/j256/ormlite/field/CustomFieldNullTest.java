@@ -83,16 +83,16 @@ public class CustomFieldNullTest extends BaseCoreTest {
 		}
 		
 		@Override
-		public Object javaToSqlArg(DbField dbField, Object javaObject) {
+		public Object javaToSqlArg(FieldType fieldType, Object javaObject) {
 			SimpleProperty property = (SimpleProperty) javaObject;
 			return property.getValue();
 		}
 
 		@Override
-		public Object resultToJava(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
+		public Object resultToJava(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 			// we override this here because the base class does the null comparison
-			Object value = resultToSqlArg(dbField, results, columnPos);
-			return sqlArgToJava(dbField, value, columnPos);
+			Object value = resultToSqlArg(fieldType, results, columnPos);
+			return sqlArgToJava(fieldType, value, columnPos);
 		}
 
 		@Override
@@ -102,7 +102,7 @@ public class CustomFieldNullTest extends BaseCoreTest {
 		}
 
 		@Override
-		public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) {
+		public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {
 			if (sqlArg == null) {
 				return new SimpleProperty("");
 			} else {

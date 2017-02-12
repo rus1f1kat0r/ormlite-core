@@ -9,8 +9,8 @@ import java.util.List;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.DatabaseFieldConfig;
-import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.ReflectiveFieldType;
 import com.j256.ormlite.misc.JavaxPersistenceConfigurer;
 import com.j256.ormlite.support.ConnectionSource;
 
@@ -27,7 +27,7 @@ public class DatabaseTableConfig<T> {
 	private Class<T> dataClass;
 	private String tableName;
 	private List<DatabaseFieldConfig> fieldConfigs;
-	private DbField[] fieldTypes;
+	private FieldType[] fieldTypes;
 	private Constructor<T> constructor;
 
 	static {
@@ -64,7 +64,7 @@ public class DatabaseTableConfig<T> {
 		this.fieldConfigs = fieldConfigs;
 	}
 
-	private DatabaseTableConfig(Class<T> dataClass, String tableName, DbField[] fieldTypes) {
+	private DatabaseTableConfig(Class<T> dataClass, String tableName, FieldType[] fieldTypes) {
 		this.dataClass = dataClass;
 		this.tableName = tableName;
 		this.fieldTypes = fieldTypes;
@@ -122,7 +122,7 @@ public class DatabaseTableConfig<T> {
 	/**
 	 * Return the field types associated with this configuration.
 	 */
-	public DbField[] getFieldTypes(DatabaseType databaseType) throws SQLException {
+	public FieldType[] getFieldTypes(DatabaseType databaseType) throws SQLException {
 		if (fieldTypes == null) {
 			throw new SQLException("Field types have not been extracted in table config");
 		}
@@ -215,29 +215,29 @@ public class DatabaseTableConfig<T> {
 		}
 	}
 
-	private static <T> DbField[] extractFieldTypes(ConnectionSource connectionSource, Class<T> clazz, String tableName)
+	private static <T> FieldType[] extractFieldTypes(ConnectionSource connectionSource, Class<T> clazz, String tableName)
 			throws SQLException {
-		List<DbField> dbFields = new ArrayList<DbField>();
+		List<FieldType> fieldTypes = new ArrayList<FieldType>();
 		for (Class<?> classWalk = clazz; classWalk != null; classWalk = classWalk.getSuperclass()) {
 			for (Field field : classWalk.getDeclaredFields()) {
-				DbField dbField = FieldType.createFieldType(connectionSource, tableName, field, clazz);
-				if (dbField != null) {
-					dbFields.add(dbField);
+				FieldType fieldType = ReflectiveFieldType.createFieldType(connectionSource, tableName, field, clazz);
+				if (fieldType != null) {
+					fieldTypes.add(fieldType);
 				}
 			}
 		}
-		if (dbFields.isEmpty()) {
+		if (fieldTypes.isEmpty()) {
 			throw new IllegalArgumentException("No fields have a " + DatabaseField.class.getSimpleName()
 					+ " annotation in " + clazz);
 		}
-		return dbFields.toArray(new DbField[dbFields.size()]);
+		return fieldTypes.toArray(new FieldType[fieldTypes.size()]);
 	}
 
-	private DbField[] convertFieldConfigs(ConnectionSource connectionSource, String tableName,
-			List<DatabaseFieldConfig> fieldConfigs) throws SQLException {
-		List<DbField> dbFields = new ArrayList<DbField>();
+	private FieldType[] convertFieldConfigs(ConnectionSource connectionSource, String tableName,
+											List<DatabaseFieldConfig> fieldConfigs) throws SQLException {
+		List<FieldType> fieldTypes = new ArrayList<FieldType>();
 		for (DatabaseFieldConfig fieldConfig : fieldConfigs) {
-			DbField dbField = null;
+			FieldType fieldType = null;
 			// walk up the classes until we find the field
 			for (Class<?> classWalk = dataClass; classWalk != null; classWalk = classWalk.getSuperclass()) {
 				Field field;
@@ -248,20 +248,20 @@ public class DatabaseTableConfig<T> {
 					continue;
 				}
 				if (field != null) {
-					dbField = new FieldType(connectionSource, tableName, field, fieldConfig, dataClass);
+					fieldType = new ReflectiveFieldType(connectionSource, tableName, field, fieldConfig, dataClass);
 					break;
 				}
 			}
 
-			if (dbField == null) {
+			if (fieldType == null) {
 				throw new SQLException("Could not find declared field with name '" + fieldConfig.getFieldName()
 						+ "' for " + dataClass);
 			}
-			dbFields.add(dbField);
+			fieldTypes.add(fieldType);
 		}
-		if (dbFields.isEmpty()) {
+		if (fieldTypes.isEmpty()) {
 			throw new SQLException("No fields were configured for class " + dataClass);
 		}
-		return dbFields.toArray(new DbField[dbFields.size()]);
+		return fieldTypes.toArray(new FieldType[fieldTypes.size()]);
 	}
 }

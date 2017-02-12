@@ -32,7 +32,7 @@ import com.j256.ormlite.dao.Dao.CreateOrUpdateStatus;
 import com.j256.ormlite.dao.Dao.DaoObserver;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -1267,13 +1267,13 @@ public class BaseDaoImplTest extends BaseCoreTest {
 	@Test
 	public void testFindForeign() throws Exception {
 		Dao<Foreign, String> dao = createDao(Foreign.class, false);
-		DbField dbField = dao.findForeignFieldType(Foo.class);
-		assertNotNull(dbField);
-		assertEquals("foo", dbField.getFieldName());
+		FieldType fieldType = dao.findForeignFieldType(Foo.class);
+		assertNotNull(fieldType);
+		assertEquals("foo", fieldType.getFieldName());
 
 		// this should be none
-		dbField = dao.findForeignFieldType(Foreign.class);
-		assertNull(dbField);
+		fieldType = dao.findForeignFieldType(Foreign.class);
+		assertNull(fieldType);
 	}
 
 	@Test

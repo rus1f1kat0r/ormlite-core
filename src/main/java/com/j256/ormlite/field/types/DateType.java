@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.DatabaseResults;
@@ -35,8 +35,8 @@ public class DateType extends BaseDateType {
 	}
 
 	@Override
-	public Object parseDefaultString(DbField dbField, String defaultStr) throws SQLException {
-		DateStringFormatConfig dateFormatConfig = convertDateStringConfig(dbField, getDefaultDateFormatConfig());
+	public Object parseDefaultString(FieldType fieldType, String defaultStr) throws SQLException {
+		DateStringFormatConfig dateFormatConfig = convertDateStringConfig(fieldType, getDefaultDateFormatConfig());
 		try {
 			return new Timestamp(parseDateString(dateFormatConfig, defaultStr).getTime());
 		} catch (ParseException e) {
@@ -46,18 +46,18 @@ public class DateType extends BaseDateType {
 	}
 
 	@Override
-	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 		return results.getTimestamp(columnPos);
 	}
 
 	@Override
-	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) {
+	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {
 		Timestamp value = (Timestamp) sqlArg;
 		return new java.util.Date(value.getTime());
 	}
 
 	@Override
-	public Object javaToSqlArg(DbField dbField, Object javaObject) {
+	public Object javaToSqlArg(FieldType fieldType, Object javaObject) {
 		java.util.Date date = (java.util.Date) javaObject;
 		return new Timestamp(date.getTime());
 	}

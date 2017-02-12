@@ -3,7 +3,7 @@ package com.j256.ormlite.db;
 import java.util.List;
 
 import com.j256.ormlite.field.DataPersister;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.FieldConverter;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.field.types.BigDecimalStringType;
@@ -22,12 +22,12 @@ public abstract class BaseSqliteDatabaseType extends BaseDatabaseType {
 	private final static FieldConverter booleanConverter = new BooleanNumberFieldConverter();
 
 	@Override
-	protected void appendLongType(StringBuilder sb, DbField dbField, int fieldWidth) {
+	protected void appendLongType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		/*
 		 * This is unfortunate. SQLIte requires that a generated-id have the string "INTEGER PRIMARY KEY AUTOINCREMENT"
 		 * even though the maximum generated value is 64-bit. See configureGeneratedId below.
 		 */
-		if (dbField.getSqlType() == SqlType.LONG && dbField.isGeneratedId()) {
+		if (fieldType.getSqlType() == SqlType.LONG && fieldType.isGeneratedId()) {
 			sb.append("INTEGER");
 		} else {
 			sb.append("BIGINT");
@@ -35,14 +35,14 @@ public abstract class BaseSqliteDatabaseType extends BaseDatabaseType {
 	}
 
 	@Override
-	protected void configureGeneratedId(String tableName, StringBuilder sb, DbField dbField,
+	protected void configureGeneratedId(String tableName, StringBuilder sb, FieldType fieldType,
 			List<String> statementsBefore, List<String> statementsAfter, List<String> additionalArgs,
 			List<String> queriesAfter) {
 		/*
 		 * Even though the documentation talks about INTEGER, it is 64-bit with a maximum value of 9223372036854775807.
 		 * See http://www.sqlite.org/faq.html#q1 and http://www.sqlite.org/autoinc.html
 		 */
-		if (dbField.getSqlType() != SqlType.INTEGER && dbField.getSqlType() != SqlType.LONG) {
+		if (fieldType.getSqlType() != SqlType.INTEGER && fieldType.getSqlType() != SqlType.LONG) {
 			throw new IllegalArgumentException(
 					"Sqlite requires that auto-increment generated-id be integer or long type");
 		}
@@ -72,7 +72,7 @@ public abstract class BaseSqliteDatabaseType extends BaseDatabaseType {
 	}
 
 	@Override
-	public FieldConverter getFieldConverter(DataPersister dataPersister, DbField dbField) {
+	public FieldConverter getFieldConverter(DataPersister dataPersister, FieldType fieldType) {
 		// we are only overriding certain types
 		switch (dataPersister.getSqlType()) {
 			case BOOLEAN :
@@ -80,7 +80,7 @@ public abstract class BaseSqliteDatabaseType extends BaseDatabaseType {
 			case BIG_DECIMAL :
 				return BigDecimalStringType.getSingleton();
 			default :
-				return super.getFieldConverter(dataPersister, dbField);
+				return super.getFieldConverter(dataPersister, fieldType);
 		}
 	}
 

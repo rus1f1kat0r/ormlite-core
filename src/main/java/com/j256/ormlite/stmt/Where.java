@@ -8,7 +8,7 @@ import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.QueryBuilder.InternalQueryBuilderWrapper;
 import com.j256.ormlite.stmt.query.Between;
 import com.j256.ormlite.stmt.query.Clause;
@@ -102,7 +102,7 @@ public class Where<T, ID> {
 
 	private final TableInfo<T, ID> tableInfo;
 	private final StatementBuilder<T, ID> statementBuilder;
-	private final DbField idDbField;
+	private final FieldType idFieldType;
 	private final String idColumnName;
 	private final DatabaseType databaseType;
 
@@ -114,11 +114,11 @@ public class Where<T, ID> {
 		// limit the constructor scope
 		this.tableInfo = tableInfo;
 		this.statementBuilder = statementBuilder;
-		this.idDbField = tableInfo.getIdField();
-		if (idDbField == null) {
+		this.idFieldType = tableInfo.getIdField();
+		if (idFieldType == null) {
 			this.idColumnName = null;
 		} else {
-			this.idColumnName = idDbField.getColumnName();
+			this.idColumnName = idFieldType.getColumnName();
 		}
 		this.databaseType = databaseType;
 	}
@@ -412,7 +412,7 @@ public class Where<T, ID> {
 		if (idColumnName == null) {
 			throw new SQLException("Object has no id column specified");
 		}
-		addClause(new SimpleComparison(idColumnName, idDbField, id, SimpleComparison.EQUAL_TO_OPERATION));
+		addClause(new SimpleComparison(idColumnName, idFieldType, id, SimpleComparison.EQUAL_TO_OPERATION));
 		return this;
 	}
 
@@ -423,7 +423,7 @@ public class Where<T, ID> {
 		if (idColumnName == null) {
 			throw new SQLException("Object has no id column specified");
 		}
-		addClause(new SimpleComparison(idColumnName, idDbField, dataDao.extractId(data),
+		addClause(new SimpleComparison(idColumnName, idFieldType, dataDao.extractId(data),
 				SimpleComparison.EQUAL_TO_OPERATION));
 		return this;
 	}
@@ -645,7 +645,7 @@ public class Where<T, ID> {
 		}
 	}
 
-	private DbField findColumnFieldType(String columnName) {
+	private FieldType findColumnFieldType(String columnName) {
 		return tableInfo.getFieldTypeByColumnName(columnName);
 	}
 

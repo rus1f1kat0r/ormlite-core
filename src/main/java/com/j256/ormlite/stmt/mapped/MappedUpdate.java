@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.table.TableInfo;
@@ -16,19 +16,19 @@ import com.j256.ormlite.table.TableInfo;
  */
 public class MappedUpdate<T, ID> extends BaseMappedStatement<T, ID> {
 
-	private final DbField versionDbField;
+	private final FieldType versionFieldType;
 	private final int versionFieldTypeIndex;
 
-	private MappedUpdate(TableInfo<T, ID> tableInfo, String statement, DbField[] argDbFields,
-						 DbField versionDbField, int versionFieldTypeIndex) {
-		super(tableInfo, statement, argDbFields);
-		this.versionDbField = versionDbField;
+	private MappedUpdate(TableInfo<T, ID> tableInfo, String statement, FieldType[] argFieldTypes,
+						 FieldType versionFieldType, int versionFieldTypeIndex) {
+		super(tableInfo, statement, argFieldTypes);
+		this.versionFieldType = versionFieldType;
 		this.versionFieldTypeIndex = versionFieldTypeIndex;
 	}
 
 	public static <T, ID> MappedUpdate<T, ID> build(DatabaseType databaseType, TableInfo<T, ID> tableInfo)
 			throws SQLException {
-		DbField idField = tableInfo.getIdField();
+		FieldType idField = tableInfo.getIdField();
 		if (idField == null) {
 			throw new SQLException("Cannot update " + tableInfo.getDataClass() + " because it doesn't have an id field");
 		}
@@ -36,13 +36,13 @@ public class MappedUpdate<T, ID> extends BaseMappedStatement<T, ID> {
 		appendTableName(databaseType, sb, "UPDATE ", tableInfo.getTableName());
 		boolean first = true;
 		int argFieldC = 0;
-		DbField versionDbField = null;
+		FieldType versionFieldType = null;
 		int versionFieldTypeIndex = -1;
 		// first we count up how many arguments we are going to have
-		for (DbField dbField : tableInfo.getFieldTypes()) {
-			if (isFieldUpdatable(dbField, idField)) {
-				if (dbField.isVersion()) {
-					versionDbField = dbField;
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+			if (isFieldUpdatable(fieldType, idField)) {
+				if (fieldType.isVersion()) {
+					versionFieldType = fieldType;
 					versionFieldTypeIndex = argFieldC;
 				}
 				argFieldC++;
@@ -50,14 +50,14 @@ public class MappedUpdate<T, ID> extends BaseMappedStatement<T, ID> {
 		}
 		// one more for where id = ?
 		argFieldC++;
-		if (versionDbField != null) {
+		if (versionFieldType != null) {
 			// one more for the AND version = ?
 			argFieldC++;
 		}
-		DbField[] argDbFields = new DbField[argFieldC];
+		FieldType[] argFieldTypes = new FieldType[argFieldC];
 		argFieldC = 0;
-		for (DbField dbField : tableInfo.getFieldTypes()) {
-			if (!isFieldUpdatable(dbField, idField)) {
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+			if (!isFieldUpdatable(fieldType, idField)) {
 				continue;
 			}
 			if (first) {
@@ -66,20 +66,20 @@ public class MappedUpdate<T, ID> extends BaseMappedStatement<T, ID> {
 			} else {
 				sb.append(", ");
 			}
-			appendFieldColumnName(databaseType, sb, dbField, null);
-			argDbFields[argFieldC++] = dbField;
+			appendFieldColumnName(databaseType, sb, fieldType, null);
+			argFieldTypes[argFieldC++] = fieldType;
 			sb.append("= ?");
 		}
 		sb.append(' ');
 		appendWhereFieldEq(databaseType, idField, sb, null);
-		argDbFields[argFieldC++] = idField;
-		if (versionDbField != null) {
+		argFieldTypes[argFieldC++] = idField;
+		if (versionFieldType != null) {
 			sb.append(" AND ");
-			appendFieldColumnName(databaseType, sb, versionDbField, null);
+			appendFieldColumnName(databaseType, sb, versionFieldType, null);
 			sb.append("= ?");
-			argDbFields[argFieldC++] = versionDbField;
+			argFieldTypes[argFieldC++] = versionFieldType;
 		}
-		return new MappedUpdate<T, ID>(tableInfo, sb.toString(), argDbFields, versionDbField, versionFieldTypeIndex);
+		return new MappedUpdate<T, ID>(tableInfo, sb.toString(), argFieldTypes, versionFieldType, versionFieldTypeIndex);
 	}
 
 	/**
@@ -88,21 +88,21 @@ public class MappedUpdate<T, ID> extends BaseMappedStatement<T, ID> {
 	public int update(DatabaseConnection databaseConnection, T data, ObjectCache objectCache) throws SQLException {
 		try {
 			// there is always and id field as an argument so just return 0 lines updated
-			if (argDbFields.length <= 1) {
+			if (argFieldTypes.length <= 1) {
 				return 0;
 			}
 			Object[] args = getFieldObjects(data);
 			Object newVersion = null;
-			if (versionDbField != null) {
-				newVersion = versionDbField.extractJavaFieldValue(data);
-				newVersion = versionDbField.moveToNextValue(newVersion);
-				args[versionFieldTypeIndex] = versionDbField.convertJavaFieldToSqlArgValue(newVersion);
+			if (versionFieldType != null) {
+				newVersion = versionFieldType.extractJavaFieldValue(data);
+				newVersion = versionFieldType.moveToNextValue(newVersion);
+				args[versionFieldTypeIndex] = versionFieldType.convertJavaFieldToSqlArgValue(newVersion);
 			}
-			int rowC = databaseConnection.update(statement, args, argDbFields);
+			int rowC = databaseConnection.update(statement, args, argFieldTypes);
 			if (rowC > 0) {
 				if (newVersion != null) {
 					// if we have updated a row then update the version field in our object to the new value
-					versionDbField.assignField(data, newVersion, false, null);
+					versionFieldType.assignField(data, newVersion, false, null);
 				}
 				if (objectCache != null) {
 					// if we've changed something then see if we need to update our cache
@@ -110,9 +110,9 @@ public class MappedUpdate<T, ID> extends BaseMappedStatement<T, ID> {
 					T cachedData = objectCache.get(clazz, id);
 					if (cachedData != null && cachedData != data) {
 						// copy each field from the updated data into the cached object
-						for (DbField dbField : tableInfo.getFieldTypes()) {
-							if (dbField != idField) {
-								dbField.assignField(cachedData, dbField.extractJavaFieldValue(data), false,
+						for (FieldType fieldType : tableInfo.getFieldTypes()) {
+							if (fieldType != idField) {
+								fieldType.assignField(cachedData, fieldType.extractJavaFieldValue(data), false,
 										objectCache);
 							}
 						}
@@ -130,8 +130,8 @@ public class MappedUpdate<T, ID> extends BaseMappedStatement<T, ID> {
 		}
 	}
 
-	private static boolean isFieldUpdatable(DbField dbField, DbField idField) {
-		if (dbField == idField || dbField.isForeignCollection() || dbField.isReadOnly()) {
+	private static boolean isFieldUpdatable(FieldType fieldType, FieldType idField) {
+		if (fieldType == idField || fieldType.isForeignCollection() || fieldType.isReadOnly()) {
 			return false;
 		} else {
 			return true;

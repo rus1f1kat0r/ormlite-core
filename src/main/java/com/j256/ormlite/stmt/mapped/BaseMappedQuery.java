@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.j256.ormlite.dao.BaseForeignCollection;
 import com.j256.ormlite.dao.ObjectCache;
-import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.GenericRowMapper;
 import com.j256.ormlite.support.DatabaseResults;
@@ -19,15 +18,15 @@ import com.j256.ormlite.table.TableInfo;
  */
 public abstract class BaseMappedQuery<T, ID> extends BaseMappedStatement<T, ID> implements GenericRowMapper<T> {
 
-	protected final DbField[] resultsFieldTypes;
+	protected final FieldType[] resultsFieldTypes;
 	// cache of column names to results position
 	private Map<String, Integer> columnPositions = null;
 	private Object parent = null;
 	private Object parentId = null;
 
-	protected BaseMappedQuery(TableInfo<T, ID> tableInfo, String statement, DbField[] argDbFields,
-			DbField[] resultsFieldTypes) {
-		super(tableInfo, statement, argDbFields);
+	protected BaseMappedQuery(TableInfo<T, ID> tableInfo, String statement, FieldType[] argFieldTypes,
+			FieldType[] resultsFieldTypes) {
+		super(tableInfo, statement, argFieldTypes);
 		this.resultsFieldTypes = resultsFieldTypes;
 	}
 
@@ -55,7 +54,7 @@ public abstract class BaseMappedQuery<T, ID> extends BaseMappedStatement<T, ID> 
 		// populate its fields
 		Object id = null;
 		boolean foreignCollections = false;
-		for (DbField fieldType : resultsFieldTypes) {
+		for (FieldType fieldType : resultsFieldTypes) {
 			if (fieldType.isForeignCollection()) {
 				foreignCollections = true;
 			} else {
@@ -79,11 +78,11 @@ public abstract class BaseMappedQuery<T, ID> extends BaseMappedStatement<T, ID> 
 		}
 		if (foreignCollections) {
 			// go back and initialize any foreign collections
-			for (DbField dbField : resultsFieldTypes) {
-				if (dbField.isForeignCollection()) {
-					BaseForeignCollection<?, ?> collection = dbField.buildForeignCollection(instance, id);
+			for (FieldType fieldType : resultsFieldTypes) {
+				if (fieldType.isForeignCollection()) {
+					BaseForeignCollection<?, ?> collection = fieldType.buildForeignCollection(instance, id);
 					if (collection != null) {
-						dbField.assignField(instance, collection, false, objectCache);
+						fieldType.assignField(instance, collection, false, objectCache);
 					}
 				}
 			}

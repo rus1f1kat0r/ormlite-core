@@ -13,8 +13,8 @@ import org.junit.Test;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.ReflectiveFieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -59,10 +59,10 @@ public class SqlDateTypeTest extends BaseTypeTest {
 
 	@Test(expected = SQLException.class)
 	public void testSqlDateParseInvalid() throws Exception {
-		DbField dbField =
-				FieldType.createFieldType(connectionSource, TABLE_NAME, LocalDate.class.getDeclaredField(DATE_COLUMN),
+		FieldType fieldType =
+				ReflectiveFieldType.createFieldType(connectionSource, TABLE_NAME, LocalDate.class.getDeclaredField(DATE_COLUMN),
 						LocalDate.class);
-		dataType.getDataPersister().parseDefaultString(dbField, "not valid date string");
+		dataType.getDataPersister().parseDefaultString(fieldType, "not valid date string");
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public class SqlDateTypeTest extends BaseTypeTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidDateField() throws Exception {
-		FieldType.createFieldType(connectionSource, TABLE_NAME, InvalidDate.class.getDeclaredField("notDate"),
+		ReflectiveFieldType.createFieldType(connectionSource, TABLE_NAME, InvalidDate.class.getDeclaredField("notDate"),
 				LocalDate.class);
 	}
 

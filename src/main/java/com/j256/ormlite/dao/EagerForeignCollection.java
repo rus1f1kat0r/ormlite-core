@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.support.DatabaseResults;
@@ -29,9 +29,9 @@ public class EagerForeignCollection<T, ID> extends BaseForeignCollection<T, ID> 
 	 * {@link Dao#assignEmptyForeignCollection(Object, String)} or {@link Dao#getEmptyForeignCollection(String)} methods
 	 * instead.
 	 */
-	public EagerForeignCollection(Dao<T, ID> dao, Object parent, Object parentId, DbField foreignDbField,
+	public EagerForeignCollection(Dao<T, ID> dao, Object parent, Object parentId, FieldType foreignFieldType,
 			String orderColumn, boolean orderAscending) throws SQLException {
-		super(dao, parent, parentId, foreignDbField, orderColumn, orderAscending);
+		super(dao, parent, parentId, foreignFieldType, orderColumn, orderAscending);
 		if (parentId == null) {
 			/*
 			 * If we have no field value then just create an empty list. This is for when we need to create an empty

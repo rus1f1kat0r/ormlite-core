@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 
 import com.j256.ormlite.dao.ObjectCache;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.GenericRowMapper;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 
@@ -86,17 +86,17 @@ public class DatabaseConnectionProxy implements DatabaseConnection {
 	}
 
 	@Override
-	public CompiledStatement compileStatement(String statement, StatementType type, DbField[] argDbFields,
+	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
 			int resultFlags, boolean cacheStore) throws SQLException {
 		if (proxy == null) {
 			return null;
 		} else {
-			return proxy.compileStatement(statement, type, argDbFields, resultFlags, cacheStore);
+			return proxy.compileStatement(statement, type, argFieldTypes, resultFlags, cacheStore);
 		}
 	}
 
 	@Override
-	public int insert(String statement, Object[] args, DbField[] argfieldDbs, GeneratedKeyHolder keyHolder)
+	public int insert(String statement, Object[] args, FieldType[] argfieldDbs, GeneratedKeyHolder keyHolder)
 			throws SQLException {
 		if (proxy == null) {
 			return 0;
@@ -106,7 +106,7 @@ public class DatabaseConnectionProxy implements DatabaseConnection {
 	}
 
 	@Override
-	public int update(String statement, Object[] args, DbField[] argfieldDbs) throws SQLException {
+	public int update(String statement, Object[] args, FieldType[] argfieldDbs) throws SQLException {
 		if (proxy == null) {
 			return 0;
 		} else {
@@ -115,7 +115,7 @@ public class DatabaseConnectionProxy implements DatabaseConnection {
 	}
 
 	@Override
-	public int delete(String statement, Object[] args, DbField[] argfieldDbs) throws SQLException {
+	public int delete(String statement, Object[] args, FieldType[] argfieldDbs) throws SQLException {
 		if (proxy == null) {
 			return 0;
 		} else {
@@ -124,7 +124,7 @@ public class DatabaseConnectionProxy implements DatabaseConnection {
 	}
 
 	@Override
-	public <T> Object queryForOne(String statement, Object[] args, DbField[] argfieldDbs,
+	public <T> Object queryForOne(String statement, Object[] args, FieldType[] argfieldDbs,
 			GenericRowMapper<T> rowMapper, ObjectCache objectCache) throws SQLException {
 		if (proxy == null) {
 			return null;
@@ -143,11 +143,11 @@ public class DatabaseConnectionProxy implements DatabaseConnection {
 	}
 
 	@Override
-	public long queryForLong(String statement, Object[] args, DbField[] argDbFields) throws SQLException {
+	public long queryForLong(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
 		if (proxy == null) {
 			return 0;
 		} else {
-			return proxy.queryForLong(statement, args, argDbFields);
+			return proxy.queryForLong(statement, args, argFieldTypes);
 		}
 	}
 

@@ -15,8 +15,8 @@ import org.junit.Test;
 
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.ReflectiveFieldType;
 import com.j256.ormlite.stmt.ArgumentHolder;
 import com.j256.ormlite.stmt.BaseCoreStmtTest;
 import com.j256.ormlite.stmt.SelectArg;
@@ -32,19 +32,19 @@ public class BaseComparisonTest extends BaseCoreStmtTest {
 
 	{
 		try {
-			cmpInt = new BaseComparison(INT_COLUMN_NAME, numberDbField, 10L, true) {
+			cmpInt = new BaseComparison(INT_COLUMN_NAME, numberFieldType, 10L, true) {
 				@Override
 				public void appendOperation(StringBuilder sb) {
 					sb.append("op");
 				}
 			};
-			cmpString = new BaseComparison(STRING_COLUMN_NAME, stringDbField, 10L, true) {
+			cmpString = new BaseComparison(STRING_COLUMN_NAME, stringFieldType, 10L, true) {
 				@Override
 				public void appendOperation(StringBuilder sb) {
 					sb.append("op");
 				}
 			};
-			cmpForeign = new BaseComparison(INT_COLUMN_NAME, foreignDbField, 10L, true) {
+			cmpForeign = new BaseComparison(INT_COLUMN_NAME, foreignFieldType, 10L, true) {
 				@Override
 				public void appendOperation(StringBuilder sb) {
 					sb.append("op");
@@ -57,14 +57,14 @@ public class BaseComparisonTest extends BaseCoreStmtTest {
 
 	@Test(expected = SQLException.class)
 	public void testAppendArgOrValueNull() throws Exception {
-		cmpInt.appendArgOrValue(null, numberDbField, new StringBuilder(), new ArrayList<ArgumentHolder>(), null);
+		cmpInt.appendArgOrValue(null, numberFieldType, new StringBuilder(), new ArrayList<ArgumentHolder>(), null);
 	}
 
 	@Test
 	public void testAppendArgOrValueLong() throws SQLException {
 		long value = 23213L;
 		StringBuilder sb = new StringBuilder();
-		cmpInt.appendArgOrValue(null, numberDbField, sb, new ArrayList<ArgumentHolder>(), value);
+		cmpInt.appendArgOrValue(null, numberFieldType, sb, new ArrayList<ArgumentHolder>(), value);
 		assertEquals(Long.toString(value) + " ", sb.toString());
 	}
 
@@ -72,7 +72,7 @@ public class BaseComparisonTest extends BaseCoreStmtTest {
 	public void testAppendArgOrValueInteger() throws SQLException {
 		int value = 23213;
 		StringBuilder sb = new StringBuilder();
-		cmpInt.appendArgOrValue(null, numberDbField, sb, new ArrayList<ArgumentHolder>(), value);
+		cmpInt.appendArgOrValue(null, numberFieldType, sb, new ArrayList<ArgumentHolder>(), value);
 		assertEquals(Integer.toString(value) + " ", sb.toString());
 	}
 
@@ -80,7 +80,7 @@ public class BaseComparisonTest extends BaseCoreStmtTest {
 	public void testAppendArgOrValueShort() throws SQLException {
 		short value = 23213;
 		StringBuilder sb = new StringBuilder();
-		cmpInt.appendArgOrValue(null, numberDbField, sb, new ArrayList<ArgumentHolder>(), value);
+		cmpInt.appendArgOrValue(null, numberFieldType, sb, new ArrayList<ArgumentHolder>(), value);
 		assertEquals(Short.toString(value) + " ", sb.toString());
 	}
 
@@ -91,7 +91,7 @@ public class BaseComparisonTest extends BaseCoreStmtTest {
 		DatabaseType databaseType = createMock(DatabaseType.class);
 		databaseType.appendEscapedWord(sb, value);
 		replay(databaseType);
-		cmpString.appendArgOrValue(databaseType, stringDbField, sb, new ArrayList<ArgumentHolder>(), value);
+		cmpString.appendArgOrValue(databaseType, stringFieldType, sb, new ArrayList<ArgumentHolder>(), value);
 		verify(databaseType);
 	}
 
@@ -100,7 +100,7 @@ public class BaseComparisonTest extends BaseCoreStmtTest {
 		SelectArg value = new SelectArg();
 		StringBuilder sb = new StringBuilder();
 		List<ArgumentHolder> argList = new ArrayList<ArgumentHolder>();
-		cmpInt.appendArgOrValue(null, numberDbField, sb, argList, value);
+		cmpInt.appendArgOrValue(null, numberFieldType, sb, argList, value);
 		assertEquals(1, argList.size());
 		assertEquals(INT_COLUMN_NAME, value.getColumnName());
 	}
@@ -109,7 +109,7 @@ public class BaseComparisonTest extends BaseCoreStmtTest {
 	public void testForeignId() throws SQLException {
 		StringBuilder sb = new StringBuilder();
 		Foo baseFoo = new Foo();
-		cmpForeign.appendArgOrValue(databaseType, foreignDbField, sb, new ArrayList<ArgumentHolder>(), baseFoo);
+		cmpForeign.appendArgOrValue(databaseType, foreignFieldType, sb, new ArrayList<ArgumentHolder>(), baseFoo);
 		StringBuilder expectSb = new StringBuilder();
 		expectSb.append(baseFoo.id);
 		expectSb.append(' ');
@@ -120,11 +120,11 @@ public class BaseComparisonTest extends BaseCoreStmtTest {
 	public void testForeignIdNull() throws Exception {
 		StringBuilder sb = new StringBuilder();
 		Field field = ForeignNull.class.getDeclaredField("foreign");
-		DbField dbField = FieldType.createFieldType(connectionSource, "BaseFoo", field, ForeignNull.class);
-		dbField.configDaoInformation(connectionSource, ForeignNull.class);
+		FieldType fieldType = ReflectiveFieldType.createFieldType(connectionSource, "BaseFoo", field, ForeignNull.class);
+		fieldType.configDaoInformation(connectionSource, ForeignNull.class);
 		ForeignNullForeign foo = new ForeignNullForeign();
 		foo.id = null;
-		cmpForeign.appendArgOrValue(databaseType, dbField, sb, new ArrayList<ArgumentHolder>(), foo);
+		cmpForeign.appendArgOrValue(databaseType, fieldType, sb, new ArrayList<ArgumentHolder>(), foo);
 	}
 
 	protected static class ForeignNull {

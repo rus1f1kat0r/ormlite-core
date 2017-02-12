@@ -14,7 +14,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.misc.IOUtils;
@@ -33,7 +33,7 @@ import com.j256.ormlite.support.DatabaseResults;
 public class TableUtils {
 
 	private static Logger logger = LoggerFactory.getLogger(TableUtils.class);
-	private static final DbField[] NO_DB_FIELDs = new DbField[0];
+	private static final FieldType[] NO_DB_FIELDs = new FieldType[0];
 
 	/**
 	 * For static methods only.
@@ -285,12 +285,12 @@ public class TableUtils {
 			List<String> statements) {
 		// run through and look for index annotations
 		Set<String> indexSet = new HashSet<String>();
-		for (DbField dbField : tableInfo.getFieldTypes()) {
-			String indexName = dbField.getIndexName();
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+			String indexName = fieldType.getIndexName();
 			if (indexName != null) {
 				indexSet.add(indexName);
 			}
-			String uniqueIndexName = dbField.getUniqueIndexName();
+			String uniqueIndexName = fieldType.getUniqueIndexName();
 			if (uniqueIndexName != null) {
 				indexSet.add(uniqueIndexName);
 			}
@@ -310,12 +310,12 @@ public class TableUtils {
 			List<String> statements, boolean ifNotExists, boolean unique) {
 		// run through and look for index annotations
 		Map<String, List<String>> indexMap = new HashMap<String, List<String>>();
-		for (DbField dbField : tableInfo.getFieldTypes()) {
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
 			String indexName;
 			if (unique) {
-				indexName = dbField.getUniqueIndexName();
+				indexName = fieldType.getUniqueIndexName();
 			} else {
-				indexName = dbField.getIndexName();
+				indexName = fieldType.getIndexName();
 			}
 			if (indexName == null) {
 				continue;
@@ -326,7 +326,7 @@ public class TableUtils {
 				columnList = new ArrayList<String>();
 				indexMap.put(indexName, columnList);
 			}
-			columnList.add(dbField.getColumnName());
+			columnList.add(fieldType.getColumnName());
 		}
 
 		StringBuilder sb = new StringBuilder(128);
@@ -366,8 +366,8 @@ public class TableUtils {
 			List<String> statements) {
 		List<String> statementsBefore = new ArrayList<String>();
 		List<String> statementsAfter = new ArrayList<String>();
-		for (DbField dbField : tableInfo.getFieldTypes()) {
-			databaseType.dropColumnArg(dbField, statementsBefore, statementsAfter);
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+			databaseType.dropColumnArg(fieldType, statementsBefore, statementsAfter);
 		}
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("DROP TABLE ");
@@ -493,23 +493,23 @@ public class TableUtils {
 		List<String> statementsAfter = new ArrayList<String>();
 		// our statement will be set here later
 		boolean first = true;
-		for (DbField dbField : tableInfo.getFieldTypes()) {
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
 			// skip foreign collections
-			if (dbField.isForeignCollection()) {
+			if (fieldType.isForeignCollection()) {
 				continue;
 			} else if (first) {
 				first = false;
 			} else {
 				sb.append(", ");
 			}
-			String columnDefinition = dbField.getColumnDefinition();
+			String columnDefinition = fieldType.getColumnDefinition();
 			if (columnDefinition == null) {
 				// we have to call back to the database type for the specific create syntax
-				databaseType.appendColumnArg(tableInfo.getTableName(), sb, dbField, additionalArgs, statementsBefore,
+				databaseType.appendColumnArg(tableInfo.getTableName(), sb, fieldType, additionalArgs, statementsBefore,
 						statementsAfter, queriesAfter);
 			} else {
 				// hand defined field
-				databaseType.appendEscapedEntityName(sb, dbField.getColumnName());
+				databaseType.appendEscapedEntityName(sb, fieldType.getColumnName());
 				sb.append(' ').append(columnDefinition).append(' ');
 			}
 		}

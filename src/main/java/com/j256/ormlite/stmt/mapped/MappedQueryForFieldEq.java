@@ -4,7 +4,6 @@ import java.sql.SQLException;
 
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.table.TableInfo;
@@ -18,9 +17,9 @@ public class MappedQueryForFieldEq<T, ID> extends BaseMappedQuery<T, ID> {
 
 	private final String label;
 
-	protected MappedQueryForFieldEq(TableInfo<T, ID> tableInfo, String statement, DbField[] argDbFields,
-			DbField[] resultsFieldTypes, String label) {
-		super(tableInfo, statement, argDbFields, resultsFieldTypes);
+	protected MappedQueryForFieldEq(TableInfo<T, ID> tableInfo, String statement, FieldType[] argFieldTypes,
+									FieldType[] resultsFieldTypes, String label) {
+		super(tableInfo, statement, argFieldTypes, resultsFieldTypes);
 		this.label = label;
 	}
 
@@ -36,7 +35,7 @@ public class MappedQueryForFieldEq<T, ID> extends BaseMappedQuery<T, ID> {
 		}
 		Object[] args = new Object[] { convertIdToFieldObject(id) };
 		// @SuppressWarnings("unchecked")
-		Object result = databaseConnection.queryForOne(statement, args, argDbFields, this, objectCache);
+		Object result = databaseConnection.queryForOne(statement, args, argFieldTypes, this, objectCache);
 		if (result == null) {
 			logger.debug("{} using '{}' and {} args, got no results", label, statement, args.length);
 		} else if (result == DatabaseConnection.MORE_THAN_ONE) {
@@ -53,25 +52,25 @@ public class MappedQueryForFieldEq<T, ID> extends BaseMappedQuery<T, ID> {
 	}
 
 	public static <T, ID> MappedQueryForFieldEq<T, ID> build(DatabaseType databaseType, TableInfo<T, ID> tableInfo,
-			DbField idDbField) throws SQLException {
-		if (idDbField == null) {
-			idDbField = tableInfo.getIdField();
-			if (idDbField == null) {
+			FieldType idFieldType) throws SQLException {
+		if (idFieldType == null) {
+			idFieldType = tableInfo.getIdField();
+			if (idFieldType == null) {
 				throw new SQLException("Cannot query-for-id with " + tableInfo.getDataClass()
 						+ " because it doesn't have an id field");
 			}
 		}
-		String statement = buildStatement(databaseType, tableInfo, idDbField);
-		return new MappedQueryForFieldEq<T, ID>(tableInfo, statement, new DbField[] {idDbField},
+		String statement = buildStatement(databaseType, tableInfo, idFieldType);
+		return new MappedQueryForFieldEq<T, ID>(tableInfo, statement, new FieldType[] {idFieldType},
 				tableInfo.getFieldTypes(), "query-for-id");
 	}
 
 	protected static <T, ID> String buildStatement(DatabaseType databaseType, TableInfo<T, ID> tableInfo,
-			DbField idDbField) {
+			FieldType idFieldType) {
 		// build the select statement by hand
 		StringBuilder sb = new StringBuilder(64);
 		appendTableName(databaseType, sb, "SELECT * FROM ", tableInfo.getTableName());
-		appendWhereFieldEq(databaseType, idDbField, sb, null);
+		appendWhereFieldEq(databaseType, idFieldType, sb, null);
 		return sb.toString();
 	}
 

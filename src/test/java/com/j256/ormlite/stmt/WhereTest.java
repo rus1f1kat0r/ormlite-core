@@ -16,8 +16,8 @@ import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.ReflectiveFieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.stmt.query.SimpleComparison;
 import com.j256.ormlite.table.TableInfo;
@@ -33,11 +33,11 @@ public class WhereTest extends BaseCoreTest {
 		Where<Foo, String> where = new Where<Foo, String>(createTableInfo(), null, databaseType);
 		assertTrue(where.toString().contains("empty where clause"));
 		String value = "bar";
-		DbField numberDbField =
-				FieldType.createFieldType(connectionSource, "foo", Foo.class.getDeclaredField(Foo.VAL_COLUMN_NAME),
+		FieldType numberFieldType =
+				ReflectiveFieldType.createFieldType(connectionSource, "foo", Foo.class.getDeclaredField(Foo.VAL_COLUMN_NAME),
 						Foo.class);
 		SimpleComparison eq =
-				new SimpleComparison(Foo.VAL_COLUMN_NAME, numberDbField, value, SimpleComparison.EQUAL_TO_OPERATION);
+				new SimpleComparison(Foo.VAL_COLUMN_NAME, numberFieldType, value, SimpleComparison.EQUAL_TO_OPERATION);
 		where.eq(Foo.VAL_COLUMN_NAME, value);
 		assertTrue(where.toString().contains(eq.toString()));
 	}

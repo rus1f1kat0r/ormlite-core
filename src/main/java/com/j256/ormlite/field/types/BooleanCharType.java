@@ -3,7 +3,7 @@ package com.j256.ormlite.field.types;
 import java.sql.SQLException;
 
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.support.DatabaseResults;
 
@@ -35,39 +35,39 @@ public class BooleanCharType extends BooleanType {
 	}
 
 	@Override
-	public Object parseDefaultString(DbField dbField, String defaultStr) {
-		return javaToSqlArg(dbField, Boolean.parseBoolean(defaultStr));
+	public Object parseDefaultString(FieldType fieldType, String defaultStr) {
+		return javaToSqlArg(fieldType, Boolean.parseBoolean(defaultStr));
 	}
 
 	@Override
-	public Object javaToSqlArg(DbField dbField, Object obj) {
-		String format = (String) dbField.getDataTypeConfigObj();
+	public Object javaToSqlArg(FieldType fieldType, Object obj) {
+		String format = (String) fieldType.getDataTypeConfigObj();
 		return ((Boolean) obj ? format.charAt(0) : format.charAt(1));
 	}
 
 	@Override
-	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 		return results.getChar(columnPos);
 	}
 
 	@Override
-	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) {
-		String format = (String) dbField.getDataTypeConfigObj();
+	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {
+		String format = (String) fieldType.getDataTypeConfigObj();
 		return ((Character) sqlArg == format.charAt(0) ? Boolean.TRUE : Boolean.FALSE);
 	}
 
 	@Override
-	public Object resultStringToJava(DbField dbField, String stringValue, int columnPos) {
+	public Object resultStringToJava(FieldType fieldType, String stringValue, int columnPos) {
 		if (stringValue.length() == 0) {
 			return Boolean.FALSE;
 		} else {
-			return sqlArgToJava(dbField, stringValue.charAt(0), columnPos);
+			return sqlArgToJava(fieldType, stringValue.charAt(0), columnPos);
 		}
 	}
 
 	@Override
-	public Object makeConfigObject(DbField dbField) throws SQLException {
-		String format = dbField.getFormat();
+	public Object makeConfigObject(FieldType fieldType) throws SQLException {
+		String format = fieldType.getFormat();
 		if (format == null) {
 			return DEFAULT_TRUE_FALSE_FORMAT;
 		} else if (format.length() == 2 && format.charAt(0) != format.charAt(1)) {

@@ -115,19 +115,19 @@ public class DataPersisterManagerTest extends BaseCoreTest {
 			super(null, new Class[] { StoredClass.class });
 		}
 		@Override
-		public Object parseDefaultString(DbField dbField, String defaultStr) {
+		public Object parseDefaultString(FieldType fieldType, String defaultStr) {
 			return null;
 		}
 		@Override
-		public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) {
+		public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) {
 			return null;
 		}
 		@Override
-		public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) {
+		public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {
 			return null;
 		}
 		@Override
-		public Object javaToSqlArg(DbField dbField, Object obj) {
+		public Object javaToSqlArg(FieldType fieldType, Object obj) {
 			return null;
 		}
 		@Override
@@ -146,20 +146,20 @@ public class DataPersisterManagerTest extends BaseCoreTest {
 			super(SqlType.STRING, new Class[] { StoredClass.class });
 		}
 		@Override
-		public Object parseDefaultString(DbField dbField, String defaultStr) throws SQLException {
+		public Object parseDefaultString(FieldType fieldType, String defaultStr) throws SQLException {
 			throw new SQLException("Default string doesn't work");
 		}
 		@Override
-		public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
+		public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 			return results.getString(columnPos);
 		}
 		@Override
-		public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) {
+		public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {
 			String value = (String) sqlArg;
 			return new StoredClass(value);
 		}
 		@Override
-		public Object javaToSqlArg(DbField dbField, Object javaObject) {
+		public Object javaToSqlArg(FieldType fieldType, Object javaObject) {
 			if (javaObject == null) {
 				return null;
 			} else {
@@ -194,20 +194,20 @@ public class DataPersisterManagerTest extends BaseCoreTest {
 			super(SqlType.STRING, new Class[] {});
 		}
 		@Override
-		public Object parseDefaultString(DbField dbField, String defaultStr) throws SQLException {
+		public Object parseDefaultString(FieldType fieldType, String defaultStr) throws SQLException {
 			throw new SQLException("Default string doesn't work");
 		}
 		@Override
-		public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) {
+		public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) {
 			return CONSTANT_VALUE;
 		}
 		@Override
-		public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) {
+		public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {
 			// constant for testing
 			return CONSTANT_VALUE;
 		}
 		@Override
-		public Object javaToSqlArg(DbField dbField, Object javaObject) {
+		public Object javaToSqlArg(FieldType fieldType, Object javaObject) {
 			if (javaObject == null) {
 				return null;
 			} else {

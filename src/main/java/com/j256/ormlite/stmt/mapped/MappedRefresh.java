@@ -4,7 +4,6 @@ import java.sql.SQLException;
 
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.table.TableInfo;
@@ -16,9 +15,9 @@ import com.j256.ormlite.table.TableInfo;
  */
 public class MappedRefresh<T, ID> extends MappedQueryForFieldEq<T, ID> {
 
-	private MappedRefresh(TableInfo<T, ID> tableInfo, String statement, DbField[] argDbFields,
-			DbField[] resultFieldTypes) {
-		super(tableInfo, statement, argDbFields, resultFieldTypes, "refresh");
+	private MappedRefresh(TableInfo<T, ID> tableInfo, String statement, FieldType[] argFieldTypes,
+			FieldType[] resultFieldTypes) {
+		super(tableInfo, statement, argFieldTypes, resultFieldTypes, "refresh");
 	}
 
 	/**
@@ -36,9 +35,9 @@ public class MappedRefresh<T, ID> extends MappedQueryForFieldEq<T, ID> {
 			return 0;
 		}
 		// copy each field from the result into the passed in object
-		for (DbField dbField : resultsFieldTypes) {
-			if (dbField != idField) {
-				dbField.assignField(data, dbField.extractJavaFieldValue(result), false, objectCache);
+		for (FieldType fieldType : resultsFieldTypes) {
+			if (fieldType != idField) {
+				fieldType.assignField(data, fieldType.extractJavaFieldValue(result), false, objectCache);
 			}
 		}
 		return 1;
@@ -46,13 +45,13 @@ public class MappedRefresh<T, ID> extends MappedQueryForFieldEq<T, ID> {
 
 	public static <T, ID> MappedRefresh<T, ID> build(DatabaseType databaseType, TableInfo<T, ID> tableInfo)
 			throws SQLException {
-		DbField idField = tableInfo.getIdField();
+		FieldType idField = tableInfo.getIdField();
 		if (idField == null) {
 			throw new SQLException("Cannot refresh " + tableInfo.getDataClass()
 					+ " because it doesn't have an id field");
 		}
 		String statement = buildStatement(databaseType, tableInfo, idField);
-		return new MappedRefresh<T, ID>(tableInfo, statement, new DbField[] { tableInfo.getIdField() },
+		return new MappedRefresh<T, ID>(tableInfo, statement, new FieldType[] { tableInfo.getIdField() },
 				tableInfo.getFieldTypes());
 	}
 }

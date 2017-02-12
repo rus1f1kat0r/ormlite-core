@@ -3,13 +3,12 @@ package com.j256.ormlite.dao;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.logger.Log.Level;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
@@ -649,7 +648,7 @@ public class RuntimeExceptionDao<T, ID> implements Dao<T, ID> {
 	 * @see Dao#findForeignFieldType(Class)
 	 */
 	@Override
-	public DbField findForeignFieldType(Class<?> clazz) {
+	public FieldType findForeignFieldType(Class<?> clazz) {
 		return dao.findForeignFieldType(clazz);
 	}
 

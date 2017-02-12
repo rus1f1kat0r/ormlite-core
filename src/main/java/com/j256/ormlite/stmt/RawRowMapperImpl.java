@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RawRowMapper;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.table.TableInfo;
 
 /**
@@ -30,10 +30,10 @@ public class RawRowMapperImpl<T, ID> implements RawRowMapper<T> {
 				continue;
 			}
 			// run through and convert each field
-			DbField dbField = tableInfo.getFieldTypeByColumnName(columnNames[i]);
-			Object fieldObj = dbField.convertStringToJavaField(resultColumns[i], i);
+			FieldType fieldType = tableInfo.getFieldTypeByColumnName(columnNames[i]);
+			Object fieldObj = fieldType.convertStringToJavaField(resultColumns[i], i);
 			// assign it to the row object
-			dbField.assignField(rowObj, fieldObj, false, null);
+			fieldType.assignField(rowObj, fieldObj, false, null);
 		}
 		return rowObj;
 	}

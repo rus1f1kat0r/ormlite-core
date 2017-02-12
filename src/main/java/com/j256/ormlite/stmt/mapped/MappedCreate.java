@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.logger.Log.Level;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.DatabaseConnection;
@@ -22,9 +22,9 @@ public class MappedCreate<T, ID> extends BaseMappedStatement<T, ID> {
 	private String dataClassName;
 	private int versionFieldTypeIndex;
 
-	private MappedCreate(TableInfo<T, ID> tableInfo, String statement, DbField[] argDbFields,
+	private MappedCreate(TableInfo<T, ID> tableInfo, String statement, FieldType[] argFieldTypes,
 			String queryNextSequenceStmt, int versionFieldTypeIndex) {
-		super(tableInfo, statement, argDbFields);
+		super(tableInfo, statement, argFieldTypes);
 		this.dataClassName = tableInfo.getDataClass().getSimpleName();
 		this.queryNextSequenceStmt = queryNextSequenceStmt;
 		this.versionFieldTypeIndex = versionFieldTypeIndex;
@@ -64,14 +64,14 @@ public class MappedCreate<T, ID> extends BaseMappedStatement<T, ID> {
 		try {
 			// implement {@link DatabaseField#foreignAutoCreate()}, need to do this _before_ getFieldObjects() below
 			if (tableInfo.isForeignAutoCreate()) {
-				for (DbField dbField : tableInfo.getFieldTypes()) {
-					if (!dbField.isForeignAutoCreate()) {
+				for (FieldType fieldType : tableInfo.getFieldTypes()) {
+					if (!fieldType.isForeignAutoCreate()) {
 						continue;
 					}
 					// get the field value
-					Object foreignObj = dbField.extractRawJavaFieldValue(data);
-					if (foreignObj != null && dbField.getForeignIdField().isObjectsFieldValueDefault(foreignObj)) {
-						dbField.createWithForeignDao(foreignObj);
+					Object foreignObj = fieldType.extractRawJavaFieldValue(data);
+					if (foreignObj != null && fieldType.getForeignIdField().isObjectsFieldValueDefault(foreignObj)) {
+						fieldType.createWithForeignDao(foreignObj);
 					}
 				}
 			}
@@ -81,14 +81,14 @@ public class MappedCreate<T, ID> extends BaseMappedStatement<T, ID> {
 			// implement {@link DatabaseField#version()}
 			if (versionFieldTypeIndex >= 0 && args[versionFieldTypeIndex] == null) {
 				// if the version is null then we need to initialize it before create
-				DbField versionDbField = argDbFields[versionFieldTypeIndex];
-				versionDefaultValue = versionDbField.moveToNextValue(null);
-				args[versionFieldTypeIndex] = versionDbField.convertJavaFieldToSqlArgValue(versionDefaultValue);
+				FieldType versionFieldType = argFieldTypes[versionFieldTypeIndex];
+				versionDefaultValue = versionFieldType.moveToNextValue(null);
+				args[versionFieldTypeIndex] = versionFieldType.convertJavaFieldToSqlArgValue(versionDefaultValue);
 			}
 
 			int rowC;
 			try {
-				rowC = databaseConnection.insert(statement, args, argDbFields, keyHolder);
+				rowC = databaseConnection.insert(statement, args, argFieldTypes, keyHolder);
 			} catch (SQLException e) {
 				logger.debug("insert data with statement '{}' and {} args, threw exception: {}", statement,
 						args.length, e);
@@ -105,7 +105,7 @@ public class MappedCreate<T, ID> extends BaseMappedStatement<T, ID> {
 			}
 			if (rowC > 0) {
 				if (versionDefaultValue != null) {
-					argDbFields[versionFieldTypeIndex].assignField(data, versionDefaultValue, false, null);
+					argFieldTypes[versionFieldTypeIndex].assignField(data, versionDefaultValue, false, null);
 				}
 				if (keyHolder != null) {
 					// assign the key returned by the database to the object's id field after it was inserted
@@ -144,23 +144,23 @@ public class MappedCreate<T, ID> extends BaseMappedStatement<T, ID> {
 		int argFieldC = 0;
 		int versionFieldTypeIndex = -1;
 		// first we count up how many arguments we are going to have
-		for (DbField dbField : tableInfo.getFieldTypes()) {
-			if (isFieldCreatable(databaseType, dbField)) {
-				if (dbField.isVersion()) {
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+			if (isFieldCreatable(databaseType, fieldType)) {
+				if (fieldType.isVersion()) {
 					versionFieldTypeIndex = argFieldC;
 				}
 				argFieldC++;
 			}
 		}
-		DbField[] argDbFields = new DbField[argFieldC];
+		FieldType[] argFieldTypes = new FieldType[argFieldC];
 		if (argFieldC == 0) {
 			databaseType.appendInsertNoColumns(sb);
 		} else {
 			argFieldC = 0;
 			boolean first = true;
 			sb.append('(');
-			for (DbField dbField : tableInfo.getFieldTypes()) {
-				if (!isFieldCreatable(databaseType, dbField)) {
+			for (FieldType fieldType : tableInfo.getFieldTypes()) {
+				if (!isFieldCreatable(databaseType, fieldType)) {
 					continue;
 				}
 				if (first) {
@@ -168,13 +168,13 @@ public class MappedCreate<T, ID> extends BaseMappedStatement<T, ID> {
 				} else {
 					sb.append(',');
 				}
-				appendFieldColumnName(databaseType, sb, dbField, null);
-				argDbFields[argFieldC++] = dbField;
+				appendFieldColumnName(databaseType, sb, fieldType, null);
+				argFieldTypes[argFieldC++] = fieldType;
 			}
 			sb.append(") VALUES (");
 			first = true;
-			for (DbField dbField : tableInfo.getFieldTypes()) {
-				if (!isFieldCreatable(databaseType, dbField)) {
+			for (FieldType fieldType : tableInfo.getFieldTypes()) {
+				if (!isFieldCreatable(databaseType, fieldType)) {
 					continue;
 				}
 				if (first) {
@@ -186,32 +186,32 @@ public class MappedCreate<T, ID> extends BaseMappedStatement<T, ID> {
 			}
 			sb.append(')');
 		}
-		DbField idField = tableInfo.getIdField();
+		FieldType idField = tableInfo.getIdField();
 		String queryNext = buildQueryNextSequence(databaseType, idField);
-		return new MappedCreate<T, ID>(tableInfo, sb.toString(), argDbFields, queryNext, versionFieldTypeIndex);
+		return new MappedCreate<T, ID>(tableInfo, sb.toString(), argFieldTypes, queryNext, versionFieldTypeIndex);
 	}
 
-	private boolean foreignCollectionsAreAssigned(DbField[] foreignCollections, Object data) throws SQLException {
-		for (DbField dbField : foreignCollections) {
-			if (dbField.extractJavaFieldValue(data) == null) {
+	private boolean foreignCollectionsAreAssigned(FieldType[] foreignCollections, Object data) throws SQLException {
+		for (FieldType fieldType : foreignCollections) {
+			if (fieldType.extractJavaFieldValue(data) == null) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private static boolean isFieldCreatable(DatabaseType databaseType, DbField dbField) {
+	private static boolean isFieldCreatable(DatabaseType databaseType, FieldType fieldType) {
 		// we don't insert anything if it is a collection
-		if (dbField.isForeignCollection()) {
+		if (fieldType.isForeignCollection()) {
 			// skip foreign collections
 			return false;
-		} else if (dbField.isReadOnly()) {
+		} else if (fieldType.isReadOnly()) {
 			// ignore read-only fields
 			return false;
 		} else if (databaseType.isIdSequenceNeeded() && databaseType.isSelectSequenceBeforeInsert()) {
 			// we need to query for the next value from the sequence and the idField is inserted afterwards
 			return true;
-		} else if (dbField.isGeneratedId() && !dbField.isSelfGeneratedId() && !dbField.isAllowGeneratedIdInsert()) {
+		} else if (fieldType.isGeneratedId() && !fieldType.isSelfGeneratedId() && !fieldType.isAllowGeneratedIdInsert()) {
 			// skip generated-id fields because they will be auto-inserted
 			return false;
 		} else {
@@ -219,7 +219,7 @@ public class MappedCreate<T, ID> extends BaseMappedStatement<T, ID> {
 		}
 	}
 
-	private static String buildQueryNextSequence(DatabaseType databaseType, DbField idField) {
+	private static String buildQueryNextSequence(DatabaseType databaseType, FieldType idField) {
 		if (idField == null) {
 			return null;
 		}

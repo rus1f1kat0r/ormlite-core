@@ -2,7 +2,7 @@ package com.j256.ormlite.field.types;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.support.DatabaseResults;
 
@@ -28,16 +28,16 @@ public class CharacterObjectType extends BaseDataType {
 	}
 
 	@Override
-	public Object parseDefaultString(DbField dbField, String defaultStr) throws SQLException {
+	public Object parseDefaultString(FieldType fieldType, String defaultStr) throws SQLException {
 		if (defaultStr.length() != 1) {
-			throw new SQLException("Problems with field " + dbField + ", default string to long for Character: '"
+			throw new SQLException("Problems with field " + fieldType + ", default string to long for Character: '"
 					+ defaultStr + "'");
 		}
 		return (Character) defaultStr.charAt(0);
 	}
 
 	@Override
-	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 		return (Character) results.getChar(columnPos);
 	}
 }

@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.DatabaseResults;
@@ -47,27 +47,27 @@ public class DateTimeType extends BaseDataType {
 	}
 
 	@Override
-	public Object javaToSqlArg(DbField dbField, Object javaObject) throws SQLException {
+	public Object javaToSqlArg(FieldType fieldType, Object javaObject) throws SQLException {
 		return extractMillis(javaObject);
 	}
 
 	@Override
-	public Object parseDefaultString(DbField dbField, String defaultStr) throws SQLException {
+	public Object parseDefaultString(FieldType fieldType, String defaultStr) throws SQLException {
 		try {
 			return Long.parseLong(defaultStr);
 		} catch (NumberFormatException e) {
-			throw SqlExceptionUtil.create("Problems with field " + dbField + " parsing default DateTime value: "
+			throw SqlExceptionUtil.create("Problems with field " + fieldType + " parsing default DateTime value: "
 					+ defaultStr, e);
 		}
 	}
 
 	@Override
-	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 		return results.getLong(columnPos);
 	}
 
 	@Override
-	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) throws SQLException {
+	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) throws SQLException {
 		return createInstance((Long) sqlArg);
 	}
 

@@ -2,7 +2,7 @@ package com.j256.ormlite.stmt.query;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.ArgumentHolder;
 import com.j256.ormlite.stmt.NullArgHolder;
 import com.j256.ormlite.stmt.StatementBuilder;
@@ -25,8 +25,8 @@ public class SetValue extends BaseComparison {
 	 */
 	private static final ArgumentHolder nullValue = new NullArgHolder();
 
-	public SetValue(String columnName, DbField dbField, Object value) throws SQLException {
-		super(columnName, dbField, (value == null ? nullValue : value), false);
+	public SetValue(String columnName, FieldType fieldType, Object value) throws SQLException {
+		super(columnName, fieldType, (value == null ? nullValue : value), false);
 	}
 
 	@Override

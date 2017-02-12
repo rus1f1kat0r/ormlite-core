@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 
 public class NullArgHolderTest {
 
@@ -13,7 +13,7 @@ public class NullArgHolderTest {
 		NullArgHolder holder = new NullArgHolder();
 		assertEquals("null-holder", holder.getColumnName());
 		holder.setMetaInfo((String) null);
-		holder.setMetaInfo((DbField) null);
+		holder.setMetaInfo((FieldType) null);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

@@ -2,7 +2,6 @@ package com.j256.ormlite.stmt.mapped;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.logger.Log.Level;
@@ -30,10 +29,10 @@ public class MappedPreparedStmt<T, ID> extends BaseMappedQuery<T, ID>
 	private final StatementType type;
 	private final boolean cacheStore;
 
-	public MappedPreparedStmt(TableInfo<T, ID> tableInfo, String statement, DbField[] argDbFields,
-			DbField[] resultFieldTypes, ArgumentHolder[] argHolders, Long limit, StatementType type,
-			boolean cacheStore) {
-		super(tableInfo, statement, argDbFields, resultFieldTypes);
+	public MappedPreparedStmt(TableInfo<T, ID> tableInfo, String statement, FieldType[] argFieldTypes,
+							  FieldType[] resultFieldTypes, ArgumentHolder[] argHolders, Long limit, StatementType type,
+							  boolean cacheStore) {
+		super(tableInfo, statement, argFieldTypes, resultFieldTypes);
 		this.argHolders = argHolders;
 		// this is an Integer because it may be null
 		this.limit = limit;
@@ -54,7 +53,7 @@ public class MappedPreparedStmt<T, ID> extends BaseMappedQuery<T, ID>
 					+ type + " statement.  Check your QueryBuilder methods.");
 		}
 		CompiledStatement stmt =
-				databaseConnection.compileStatement(statement, type, argDbFields, resultFlags, cacheStore);
+				databaseConnection.compileStatement(statement, type, argFieldTypes, resultFlags, cacheStore);
 		// this may return null if the stmt had to be closed
 		return assignStatementArguments(stmt);
 	}
@@ -100,12 +99,12 @@ public class MappedPreparedStmt<T, ID> extends BaseMappedQuery<T, ID>
 			}
 			for (int i = 0; i < argHolders.length; i++) {
 				Object argValue = argHolders[i].getSqlArgValue();
-				DbField dbField = argDbFields[i];
+				FieldType fieldType = argFieldTypes[i];
 				SqlType sqlType;
-				if (dbField == null) {
+				if (fieldType == null) {
 					sqlType = argHolders[i].getSqlType();
 				} else {
-					sqlType = dbField.getSqlType();
+					sqlType = fieldType.getSqlType();
 				}
 				stmt.setObject(i, argValue, sqlType);
 				if (argValues != null) {

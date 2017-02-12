@@ -3,7 +3,7 @@ package com.j256.ormlite.field.types;
 import java.math.BigInteger;
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.DatabaseResults;
@@ -35,22 +35,22 @@ public class BigIntegerType extends BaseDataType {
 	}
 
 	@Override
-	public Object parseDefaultString(DbField dbField, String defaultStr) throws SQLException {
+	public Object parseDefaultString(FieldType fieldType, String defaultStr) throws SQLException {
 		try {
 			return new BigInteger(defaultStr).toString();
 		} catch (IllegalArgumentException e) {
 			throw SqlExceptionUtil.create(
-					"Problems with field " + dbField + " parsing default BigInteger string '" + defaultStr + "'", e);
+					"Problems with field " + fieldType + " parsing default BigInteger string '" + defaultStr + "'", e);
 		}
 	}
 
 	@Override
-	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 		return results.getString(columnPos);
 	}
 
 	@Override
-	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) throws SQLException {
+	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) throws SQLException {
 		try {
 			return new BigInteger((String) sqlArg);
 		} catch (IllegalArgumentException e) {
@@ -60,7 +60,7 @@ public class BigIntegerType extends BaseDataType {
 	}
 
 	@Override
-	public Object javaToSqlArg(DbField dbField, Object obj) {
+	public Object javaToSqlArg(FieldType fieldType, Object obj) {
 		BigInteger bigInteger = (BigInteger) obj;
 		return bigInteger.toString();
 	}

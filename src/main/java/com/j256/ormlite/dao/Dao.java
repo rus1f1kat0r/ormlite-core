@@ -12,7 +12,7 @@ import java.util.concurrent.Callable;
 
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.GenericRowMapper;
@@ -588,7 +588,7 @@ public interface Dao<T, ID> extends CloseableIterable<T> {
 	/**
 	 * Returns the class of the DAO. This is used by internal query operators.
 	 */
-	public DbField findForeignFieldType(Class<?> clazz);
+	public FieldType findForeignFieldType(Class<?> clazz);
 
 	/**
 	 * Returns true if we can call update on this class. This is used most likely by folks who are extending the base

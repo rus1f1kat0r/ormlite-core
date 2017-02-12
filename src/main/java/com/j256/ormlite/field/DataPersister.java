@@ -31,9 +31,9 @@ public interface DataPersister extends FieldConverter {
 
 	/**
 	 * This makes a configuration object for the data-type or returns null if none. The object can be accessed later via
-	 * {@link FieldType#getDataTypeConfigObj()}.
+	 * {@link ReflectiveFieldType#getDataTypeConfigObj()}.
 	 */
-	public Object makeConfigObject(DbField dbField) throws SQLException;
+	public Object makeConfigObject(FieldType fieldType) throws SQLException;
 
 	/**
 	 * Convert a {@link Number} object to its primitive object suitable for assigning to a java ID field.

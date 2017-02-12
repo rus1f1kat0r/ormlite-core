@@ -11,8 +11,8 @@ import org.junit.Test;
 import com.j256.ormlite.BaseCoreTest;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.ReflectiveFieldType;
 import com.j256.ormlite.misc.IOUtils;
 import com.j256.ormlite.stmt.ArgumentHolder;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
@@ -35,12 +35,12 @@ public class MappedPreparedQueryTest extends BaseCoreTest {
 		TableInfo<LocalFoo, Integer> tableInfo =
 				new TableInfo<LocalFoo, Integer>(connectionSource, null, LocalFoo.class);
 		MappedPreparedStmt<LocalFoo, Integer> rowMapper = new MappedPreparedStmt<LocalFoo, Integer>(tableInfo, null,
-				new DbField[0], tableInfo.getFieldTypes(), new ArgumentHolder[0], null, StatementType.SELECT, false);
+				new FieldType[0], tableInfo.getFieldTypes(), new ArgumentHolder[0], null, StatementType.SELECT, false);
 
 		DatabaseConnection conn = connectionSource.getReadOnlyConnection(TABLE_NAME);
 		CompiledStatement stmt = null;
 		try {
-			stmt = conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, new DbField[0],
+			stmt = conn.compileStatement("select * from " + TABLE_NAME, StatementType.SELECT, new FieldType[0],
 					DatabaseConnection.DEFAULT_RESULT_FLAGS, true);
 
 			DatabaseResults results = stmt.runQuery(null);
@@ -72,12 +72,12 @@ public class MappedPreparedQueryTest extends BaseCoreTest {
 		TableInfo<LocalFoo, Integer> tableInfo =
 				new TableInfo<LocalFoo, Integer>(connectionSource, null, LocalFoo.class);
 		MappedPreparedStmt<LocalFoo, Integer> preparedQuery =
-				new MappedPreparedStmt<LocalFoo, Integer>(tableInfo, "select * from " + TABLE_NAME, new DbField[0],
+				new MappedPreparedStmt<LocalFoo, Integer>(tableInfo, "select * from " + TABLE_NAME, new FieldType[0],
 						tableInfo.getFieldTypes(), new ArgumentHolder[0], 1L, StatementType.SELECT, false);
 
 		checkResults(foos, preparedQuery, 1);
 		preparedQuery = new MappedPreparedStmt<LocalFoo, Integer>(tableInfo, "select * from " + TABLE_NAME,
-				new DbField[0], tableInfo.getFieldTypes(), new ArgumentHolder[0], null, StatementType.SELECT, false);
+				new FieldType[0], tableInfo.getFieldTypes(), new ArgumentHolder[0], null, StatementType.SELECT, false);
 		checkResults(foos, preparedQuery, 2);
 	}
 
@@ -104,8 +104,8 @@ public class MappedPreparedQueryTest extends BaseCoreTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testObjectNoConstructor() throws SQLException {
 		new MappedPreparedStmt<NoConstructor, Void>(
-				new TableInfo<NoConstructor, Void>(connectionSource, null, NoConstructor.class), null, new DbField[0],
-				new FieldType[0], new ArgumentHolder[0], null, StatementType.SELECT, false);
+				new TableInfo<NoConstructor, Void>(connectionSource, null, NoConstructor.class), null, new FieldType[0],
+				new ReflectiveFieldType[0], new ArgumentHolder[0], null, StatementType.SELECT, false);
 	}
 
 	@DatabaseTable(tableName = TABLE_NAME)

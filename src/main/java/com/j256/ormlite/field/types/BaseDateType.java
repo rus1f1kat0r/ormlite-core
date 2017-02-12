@@ -6,7 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 
 /**
@@ -27,12 +27,12 @@ public abstract class BaseDateType extends BaseDataType {
 		super(sqlType);
 	}
 
-	protected static DateStringFormatConfig convertDateStringConfig(DbField dbField,
+	protected static DateStringFormatConfig convertDateStringConfig(FieldType fieldType,
 			DateStringFormatConfig defaultDateFormatConfig) {
-		if (dbField == null) {
+		if (fieldType == null) {
 			return defaultDateFormatConfig;
 		}
-		DateStringFormatConfig configObj = (DateStringFormatConfig) dbField.getDataTypeConfigObj();
+		DateStringFormatConfig configObj = (DateStringFormatConfig) fieldType.getDataTypeConfigObj();
 		if (configObj == null) {
 			return defaultDateFormatConfig;
 		} else {

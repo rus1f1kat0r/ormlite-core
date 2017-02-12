@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import com.j256.ormlite.BaseCoreTest;
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.h2.H2ConnectionSource;
 
 public class ReflectionDatabaseConnectionProxyFactoryTest extends BaseCoreTest {
@@ -60,7 +60,7 @@ public class ReflectionDatabaseConnectionProxyFactoryTest extends BaseCoreTest {
 		}
 
 		@Override
-		public int insert(String statement, Object[] args, DbField[] argfieldDbs, GeneratedKeyHolder keyHolder)
+		public int insert(String statement, Object[] args, FieldType[] argfieldDbs, GeneratedKeyHolder keyHolder)
 				throws SQLException {
 			// change the first argument which should be the 'val' field
 			args[0] = (Integer) args[0] + VALUE_INCREMENT;

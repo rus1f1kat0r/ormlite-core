@@ -7,16 +7,16 @@ import java.lang.reflect.Field;
 import org.junit.Before;
 
 import com.j256.ormlite.BaseCoreTest;
-import com.j256.ormlite.field.DbField;
 import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.ReflectiveFieldType;
 import com.j256.ormlite.table.TableInfo;
 
 public abstract class BaseCoreStmtTest extends BaseCoreTest {
 
 	protected TableInfo<Foo, Integer> baseFooTableInfo;
-	protected DbField numberDbField;
-	protected DbField stringDbField;
-	protected DbField foreignDbField;
+	protected FieldType numberFieldType;
+	protected FieldType stringFieldType;
+	protected FieldType foreignFieldType;
 
 	@Override
 	@Before
@@ -25,16 +25,16 @@ public abstract class BaseCoreStmtTest extends BaseCoreTest {
 
 		Field field = Foo.class.getDeclaredField("stringField");
 		assertEquals(String.class, field.getType());
-		stringDbField = FieldType.createFieldType(connectionSource, "BaseFoo", field, Foo.class);
-		stringDbField.configDaoInformation(connectionSource, Foo.class);
+		stringFieldType = ReflectiveFieldType.createFieldType(connectionSource, "BaseFoo", field, Foo.class);
+		stringFieldType.configDaoInformation(connectionSource, Foo.class);
 		field = Foo.class.getDeclaredField("val");
 		assertEquals(int.class, field.getType());
-		numberDbField = FieldType.createFieldType(connectionSource, "BaseFoo", field, Foo.class);
-		numberDbField.configDaoInformation(connectionSource, Foo.class);
+		numberFieldType = ReflectiveFieldType.createFieldType(connectionSource, "BaseFoo", field, Foo.class);
+		numberFieldType.configDaoInformation(connectionSource, Foo.class);
 		field = Foreign.class.getDeclaredField("foo");
 		assertEquals(Foo.class, field.getType());
-		foreignDbField = FieldType.createFieldType(connectionSource, "BaseFoo", field, Foreign.class);
-		foreignDbField.configDaoInformation(connectionSource, Foreign.class);
+		foreignFieldType = ReflectiveFieldType.createFieldType(connectionSource, "BaseFoo", field, Foreign.class);
+		foreignFieldType.configDaoInformation(connectionSource, Foreign.class);
 
 		baseFooTableInfo = new TableInfo<Foo, Integer>(connectionSource, null, Foo.class);
 	}

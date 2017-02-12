@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.query.Clause;
 import com.j256.ormlite.stmt.query.SetExpression;
 import com.j256.ormlite.stmt.query.SetValue;
@@ -44,11 +44,11 @@ public class UpdateBuilder<T, ID> extends StatementBuilder<T, ID> {
 	 * with the value escaped if necessary.
 	 */
 	public UpdateBuilder<T, ID> updateColumnValue(String columnName, Object value) throws SQLException {
-		DbField dbField = verifyColumnName(columnName);
-		if (dbField.isForeignCollection()) {
+		FieldType fieldType = verifyColumnName(columnName);
+		if (fieldType.isForeignCollection()) {
 			throw new SQLException("Can't update foreign colletion field: " + columnName);
 		}
-		addUpdateColumnToList(columnName, new SetValue(columnName, dbField, value));
+		addUpdateColumnToList(columnName, new SetValue(columnName, fieldType, value));
 		return this;
 	}
 
@@ -63,11 +63,11 @@ public class UpdateBuilder<T, ID> extends StatementBuilder<T, ID> {
 	 * </p>
 	 */
 	public UpdateBuilder<T, ID> updateColumnExpression(String columnName, String expression) throws SQLException {
-		DbField dbField = verifyColumnName(columnName);
-		if (dbField.isForeignCollection()) {
+		FieldType fieldType = verifyColumnName(columnName);
+		if (fieldType.isForeignCollection()) {
 			throw new SQLException("Can't update foreign colletion field: " + columnName);
 		}
-		addUpdateColumnToList(columnName, new SetExpression(columnName, dbField, expression));
+		addUpdateColumnToList(columnName, new SetExpression(columnName, fieldType, expression));
 		return this;
 	}
 

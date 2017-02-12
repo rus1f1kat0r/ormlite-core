@@ -2,7 +2,7 @@ package com.j256.ormlite.field.types;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.support.DatabaseResults;
 
@@ -32,12 +32,12 @@ public class BooleanObjectType extends BaseDataType {
 	}
 
 	@Override
-	public Object parseDefaultString(DbField dbField, String defaultStr) {
+	public Object parseDefaultString(FieldType fieldType, String defaultStr) {
 		return Boolean.parseBoolean(defaultStr);
 	}
 
 	@Override
-	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 		return (Boolean) results.getBoolean(columnPos);
 	}
 

@@ -15,7 +15,7 @@ import com.j256.ormlite.dao.RawRowMapper;
 import com.j256.ormlite.dao.RawRowObjectMapper;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
@@ -50,7 +50,7 @@ import com.j256.ormlite.table.TableInfo;
 public class StatementExecutor<T, ID> implements GenericRowMapper<String[]> {
 
 	private static Logger logger = LoggerFactory.getLogger(StatementExecutor.class);
-	private static final DbField[] NO_DB_FIELDs = new DbField[0];
+	private static final FieldType[] NO_DB_FIELDs = new FieldType[0];
 
 	private final DatabaseType databaseType;
 	private final TableInfo<T, ID> tableInfo;
@@ -64,7 +64,7 @@ public class StatementExecutor<T, ID> implements GenericRowMapper<String[]> {
 	private MappedRefresh<T, ID> mappedRefresh;
 	private String countStarQuery;
 	private String ifExistsQuery;
-	private DbField[] ifExistsDbFields;
+	private FieldType[] ifExistsFieldTypes;
 	private RawRowMapper<T> rawRowMapper;
 
 	private final ThreadLocal<Boolean> localIsInBatchMode = new ThreadLocal<Boolean>() {
@@ -686,10 +686,10 @@ public class StatementExecutor<T, ID> implements GenericRowMapper<String[]> {
 			 */
 			qb.where().eq(tableInfo.getIdField().getColumnName(), new SelectArg());
 			ifExistsQuery = qb.prepareStatementString();
-			ifExistsDbFields = new DbField[] { tableInfo.getIdField() };
+			ifExistsFieldTypes = new FieldType[] { tableInfo.getIdField() };
 		}
 		Object idSqlArg = tableInfo.getIdField().convertJavaFieldToSqlArgValue(id);
-		long count = connection.queryForLong(ifExistsQuery, new Object[] { idSqlArg }, ifExistsDbFields);
+		long count = connection.queryForLong(ifExistsQuery, new Object[] { idSqlArg }, ifExistsFieldTypes);
 		logger.debug("query of '{}' returned {}", ifExistsQuery, count);
 		return (count != 0);
 	}

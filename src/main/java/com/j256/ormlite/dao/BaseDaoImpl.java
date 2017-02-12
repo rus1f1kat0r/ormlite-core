@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.misc.BaseDaoEnabled;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.stmt.DeleteBuilder;
@@ -164,12 +164,12 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 		 * configured for auto-refresh, foreign BaseDaoEnabled classes, and foreign-collections. This would cause the
 		 * system to go recursive and for class loops, a stack overflow.
 		 * 
-		 * Then we fixed this by putting a level counter in the FieldType constructor that would stop the configurations
+		 * Then we fixed this by putting a level counter in the ReflectiveFieldType constructor that would stop the configurations
 		 * when we reach some recursion level. But this created some bad problems because we were using the DaoManager
 		 * to cache the created DAOs that had been constructed already limited by the level.
 		 * 
 		 * What we do now is have a 2 phase initialization. The constructor initializes most of the fields but then we
-		 * go back and call FieldType.configDaoInformation() after we are done. So for every DAO that is initialized
+		 * go back and call ReflectiveFieldType.configDaoInformation() after we are done. So for every DAO that is initialized
 		 * here, we have to see if it is the top DAO. If not we save it for dao configuration later.
 		 */
 		List<BaseDaoImpl<?, ?>> daoConfigList = daoConfigLevelLocal.get();
@@ -201,8 +201,8 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 
 				try {
 					// config our fields which may go recursive
-					for (DbField dbField : dao.getTableInfo().getFieldTypes()) {
-						dbField.configDaoInformation(connectionSource, dao.getDataClass());
+					for (FieldType fieldType : dao.getTableInfo().getFieldTypes()) {
+						fieldType.configDaoInformation(connectionSource, dao.getDataClass());
 					}
 				} catch (SQLException e) {
 					// unregister the DAO we just pre-registered
@@ -730,11 +730,11 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 	@Override
 	public boolean objectsEqual(T data1, T data2) throws SQLException {
 		checkForInitialized();
-		for (DbField dbField : tableInfo.getFieldTypes()) {
-			Object fieldObj1 = dbField.extractJavaFieldValue(data1);
-			Object fieldObj2 = dbField.extractJavaFieldValue(data2);
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+			Object fieldObj1 = fieldType.extractJavaFieldValue(data1);
+			Object fieldObj2 = fieldType.extractJavaFieldValue(data2);
 			// we can't just do fieldObj1.equals(fieldObj2) because of byte[].equals()
-			if (!dbField.getDataPersister().dataIsEqual(fieldObj1, fieldObj2)) {
+			if (!fieldType.getDataPersister().dataIsEqual(fieldObj1, fieldObj2)) {
 				return false;
 			}
 		}
@@ -744,7 +744,7 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 	@Override
 	public ID extractId(T data) throws SQLException {
 		checkForInitialized();
-		DbField idField = tableInfo.getIdField();
+		FieldType idField = tableInfo.getIdField();
 		if (idField == null) {
 			throw new SQLException("Class " + dataClass + " does not have an id field");
 		}
@@ -759,11 +759,11 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 	}
 
 	@Override
-	public DbField findForeignFieldType(Class<?> clazz) {
+	public FieldType findForeignFieldType(Class<?> clazz) {
 		checkForInitialized();
-		for (DbField dbField : tableInfo.getFieldTypes()) {
-			if (dbField.getType() == clazz) {
-				return dbField;
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+			if (fieldType.getType() == clazz) {
+				return fieldType;
 			}
 		}
 		return null;
@@ -1070,12 +1070,12 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 		} else {
 			id = extractId(parent);
 		}
-		for (DbField dbField : tableInfo.getFieldTypes()) {
-			if (dbField.getColumnName().equals(fieldName)) {
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+			if (fieldType.getColumnName().equals(fieldName)) {
 				@SuppressWarnings("unchecked")
-				ForeignCollection<FT> collection = (ForeignCollection<FT>) dbField.buildForeignCollection(parent, id);
+				ForeignCollection<FT> collection = (ForeignCollection<FT>) fieldType.buildForeignCollection(parent, id);
 				if (parent != null) {
-					dbField.assignField(parent, collection, true, null);
+					fieldType.assignField(parent, collection, true, null);
 				}
 				return collection;
 			}
@@ -1108,13 +1108,13 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 		QueryBuilder<T, ID> qb = queryBuilder();
 		Where<T, ID> where = qb.where();
 		int fieldC = 0;
-		for (DbField dbField : tableInfo.getFieldTypes()) {
-			Object fieldValue = dbField.getFieldValueIfNotDefault(matchObj);
+		for (FieldType fieldType : tableInfo.getFieldTypes()) {
+			Object fieldValue = fieldType.getFieldValueIfNotDefault(matchObj);
 			if (fieldValue != null) {
 				if (useArgs) {
 					fieldValue = new SelectArg(fieldValue);
 				}
-				where.eq(dbField.getColumnName(), fieldValue);
+				where.eq(fieldType.getColumnName(), fieldValue);
 				fieldC++;
 			}
 		}

@@ -16,18 +16,18 @@ public abstract class BaseFieldConverter implements FieldConverter {
 	 *             If there are problems with the conversion.
 	 */
 	@Override
-	public Object javaToSqlArg(DbField dbField, Object javaObject) throws SQLException {
+	public Object javaToSqlArg(FieldType fieldType, Object javaObject) throws SQLException {
 		// noop pass-thru
 		return javaObject;
 	}
 
 	@Override
-	public Object resultToJava(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
-		Object value = resultToSqlArg(dbField, results, columnPos);
+	public Object resultToJava(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
+		Object value = resultToSqlArg(fieldType, results, columnPos);
 		if (value == null) {
 			return null;
 		} else {
-			return sqlArgToJava(dbField, value, columnPos);
+			return sqlArgToJava(fieldType, value, columnPos);
 		}
 	}
 
@@ -36,7 +36,7 @@ public abstract class BaseFieldConverter implements FieldConverter {
 	 *             If there are problems with the conversion.
 	 */
 	@Override
-	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) throws SQLException {
+	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) throws SQLException {
 		// noop pass-thru
 		return sqlArg;
 	}

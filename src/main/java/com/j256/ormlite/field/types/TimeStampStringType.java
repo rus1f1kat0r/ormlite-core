@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 
 /**
@@ -33,15 +33,15 @@ public class TimeStampStringType extends DateStringType {
 	}
 
 	@Override
-	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) throws SQLException {
-		Date date = (Date) super.sqlArgToJava(dbField, sqlArg, columnPos);
+	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) throws SQLException {
+		Date date = (Date) super.sqlArgToJava(fieldType, sqlArg, columnPos);
 		return new Timestamp(date.getTime());
 	}
 
 	@Override
-	public Object javaToSqlArg(DbField dbField, Object javaObject) {
+	public Object javaToSqlArg(FieldType fieldType, Object javaObject) {
 		Timestamp timeStamp = (Timestamp) javaObject;
-		return super.javaToSqlArg(dbField, new Date(timeStamp.getTime()));
+		return super.javaToSqlArg(fieldType, new Date(timeStamp.getTime()));
 	}
 
 	@Override

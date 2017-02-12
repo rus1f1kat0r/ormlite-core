@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import com.j256.ormlite.BaseCoreTest;
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.h2.H2ConnectionSource;
 
 /**
@@ -88,7 +88,7 @@ public class DatabaseConnectionProxyFactoryTest extends BaseCoreTest {
 
 	/**
 	 * Sample connection proxy which overrides the {@link DatabaseConnectionProxy} so we can do something interesting
-	 * specifically with the {@link DatabaseConnection#insert(String, Object[], DbField[], GeneratedKeyHolder)}
+	 * specifically with the {@link DatabaseConnection#insert(String, Object[], FieldType[], GeneratedKeyHolder)}
 	 * method. In this case we are just recording the argument to insert which is the setting of the {@code val} field
 	 * in {@link Foo}.
 	 */
@@ -98,7 +98,7 @@ public class DatabaseConnectionProxyFactoryTest extends BaseCoreTest {
 			super(conn);
 		}
 		@Override
-		public int insert(String statement, Object[] args, DbField[] argfieldDbs, GeneratedKeyHolder keyHolder)
+		public int insert(String statement, Object[] args, FieldType[] argfieldDbs, GeneratedKeyHolder keyHolder)
 				throws SQLException {
 			// just record the first argument to the insert which for Foo should be the 'val' field
 			lastValue = (Integer) args[0];

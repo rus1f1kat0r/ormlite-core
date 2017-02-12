@@ -22,9 +22,9 @@ import com.j256.ormlite.TestUtils;
 import com.j256.ormlite.db.BaseDatabaseType.BooleanNumberFieldConverter;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
-import com.j256.ormlite.field.FieldConverter;
 import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.FieldConverter;
+import com.j256.ormlite.field.ReflectiveFieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.field.types.DateStringType;
 import com.j256.ormlite.field.types.EnumStringType;
@@ -186,11 +186,11 @@ public class BaseCoreDatabaseTypeTest extends BaseCoreTest {
 
 	@Test
 	public void testBooleanConverterJavaToArg() throws Exception {
-		DbField dbField =
-				FieldType.createFieldType(connectionSource, "foo", ManyFields.class.getDeclaredField("bool"),
+		FieldType fieldType =
+				ReflectiveFieldType.createFieldType(connectionSource, "foo", ManyFields.class.getDeclaredField("bool"),
 						ManyFields.class);
-		assertEquals(Byte.valueOf((byte) 1), booleanFieldConverter.javaToSqlArg(dbField, Boolean.TRUE));
-		assertEquals(Byte.valueOf((byte) 0), booleanFieldConverter.javaToSqlArg(dbField, Boolean.FALSE));
+		assertEquals(Byte.valueOf((byte) 1), booleanFieldConverter.javaToSqlArg(fieldType, Boolean.TRUE));
+		assertEquals(Byte.valueOf((byte) 0), booleanFieldConverter.javaToSqlArg(fieldType, Boolean.FALSE));
 	}
 
 	@Test
@@ -201,23 +201,23 @@ public class BaseCoreDatabaseTypeTest extends BaseCoreTest {
 		expect(results.getByte(1)).andReturn((byte) 1);
 		expect(results.getByte(2)).andReturn((byte) 0);
 		replay(results);
-		DbField dbField =
-				FieldType.createFieldType(connectionSource, "foo", ManyFields.class.getDeclaredField("bool"),
+		FieldType fieldType =
+				ReflectiveFieldType.createFieldType(connectionSource, "foo", ManyFields.class.getDeclaredField("bool"),
 						ManyFields.class);
-		assertEquals(first, booleanFieldConverter.resultToJava(dbField, results, 1));
-		assertEquals(second, booleanFieldConverter.resultToJava(dbField, results, 2));
+		assertEquals(first, booleanFieldConverter.resultToJava(fieldType, results, 1));
+		assertEquals(second, booleanFieldConverter.resultToJava(fieldType, results, 2));
 		verify(results);
 	}
 
 	@Test
 	public void testBooleanConverterParseDefaultString() throws Exception {
-		DbField dbField =
-				FieldType.createFieldType(connectionSource, "foo", ManyFields.class.getDeclaredField("bool"),
+		FieldType fieldType =
+				ReflectiveFieldType.createFieldType(connectionSource, "foo", ManyFields.class.getDeclaredField("bool"),
 						ManyFields.class);
 		assertEquals(Byte.valueOf((byte) 1),
-				booleanFieldConverter.parseDefaultString(dbField, Boolean.TRUE.toString()));
+				booleanFieldConverter.parseDefaultString(fieldType, Boolean.TRUE.toString()));
 		assertEquals(Byte.valueOf((byte) 0),
-				booleanFieldConverter.parseDefaultString(dbField, Boolean.FALSE.toString()));
+				booleanFieldConverter.parseDefaultString(fieldType, Boolean.FALSE.toString()));
 	}
 
 	@Test
@@ -263,7 +263,7 @@ public class BaseCoreDatabaseTypeTest extends BaseCoreTest {
 		OurDbTypeGeneratedId ourDbType = new OurDbTypeGeneratedId();
 		String fieldName = "genId";
 		testFooColumn(ourDbType, fieldName, "BIGINT");
-		assertEquals(fieldName, ourDbType.dbField.getFieldName());
+		assertEquals(fieldName, ourDbType.fieldType.getFieldName());
 	}
 
 	@Test
@@ -271,7 +271,7 @@ public class BaseCoreDatabaseTypeTest extends BaseCoreTest {
 		OurDbTypeGeneratedId ourDbType = new OurDbTypeGeneratedId();
 		String fieldName = "genIdSeq";
 		testFooColumn(ourDbType, fieldName, "BIGINT");
-		assertEquals(fieldName, ourDbType.dbField.getFieldName());
+		assertEquals(fieldName, ourDbType.fieldType.getFieldName());
 	}
 
 	@Test
@@ -290,10 +290,10 @@ public class BaseCoreDatabaseTypeTest extends BaseCoreTest {
 		List<String> stmtsBefore = new ArrayList<String>();
 		List<String> stmtsAfter = new ArrayList<String>();
 		List<String> queriesAfter = new ArrayList<String>();
-		DbField dbField =
-				FieldType.createFieldType(connectionSource, "foo", ManyFields.class.getDeclaredField(fieldName),
+		FieldType fieldType =
+				ReflectiveFieldType.createFieldType(connectionSource, "foo", ManyFields.class.getDeclaredField(fieldName),
 						ManyFields.class);
-		databaseType.appendColumnArg(null, sb, dbField, additionalArgs, stmtsBefore, stmtsAfter, queriesAfter);
+		databaseType.appendColumnArg(null, sb, fieldType, additionalArgs, stmtsBefore, stmtsAfter, queriesAfter);
 		StringBuilder expectedSb = new StringBuilder();
 		databaseType.appendEscapedEntityName(expectedSb, fieldName);
 		expectedSb.append(' ').append(expected).append(' ');
@@ -330,17 +330,17 @@ public class BaseCoreDatabaseTypeTest extends BaseCoreTest {
 	}
 
 	private static class OurDbTypeGeneratedId extends OurDbType {
-		DbField dbField;
+		FieldType fieldType;
 		@Override
-		protected void configureGeneratedId(String tableName, StringBuilder sb, DbField dbField,
+		protected void configureGeneratedId(String tableName, StringBuilder sb, FieldType fieldType,
 				List<String> statementsBefore, List<String> statementsAfter, List<String> additionalArgs,
 				List<String> queriesAfter) {
-			this.dbField = dbField;
+			this.fieldType = fieldType;
 		}
 		@Override
-		protected void configureGeneratedIdSequence(StringBuilder sb, DbField dbField,
+		protected void configureGeneratedIdSequence(StringBuilder sb, FieldType fieldType,
 				List<String> statementsBefore, List<String> additionalArgs, List<String> queriesAfter) {
-			this.dbField = dbField;
+			this.fieldType = fieldType;
 		}
 	}
 

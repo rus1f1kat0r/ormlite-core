@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.j256.ormlite.BaseCoreTest;
 import com.j256.ormlite.field.DataPersisterManager;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.field.types.StringType;
 import com.j256.ormlite.table.DatabaseTable;
@@ -149,13 +149,13 @@ public class CreateOrUpdateTest extends BaseCoreTest {
 		}
 
 		@Override
-		public Object javaToSqlArg(DbField dbField, Object javaObject) {
+		public Object javaToSqlArg(FieldType fieldType, Object javaObject) {
 			EntityId entityId = (EntityId) javaObject;
 			return entityId.value;
 		}
 
 		@Override
-		public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) {
+		public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {
 			return EntityId.entityId((String) sqlArg);
 		}
 	}

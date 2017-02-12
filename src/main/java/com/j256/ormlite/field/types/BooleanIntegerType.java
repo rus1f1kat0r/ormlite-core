@@ -3,7 +3,7 @@ package com.j256.ormlite.field.types;
 import java.sql.SQLException;
 
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DbField;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.support.DatabaseResults;
 
@@ -35,31 +35,31 @@ public class BooleanIntegerType extends BooleanType {
 	}
 
 	@Override
-	public Object parseDefaultString(DbField dbField, String defaultStr) {
-		return javaToSqlArg(dbField, Boolean.parseBoolean(defaultStr));
+	public Object parseDefaultString(FieldType fieldType, String defaultStr) {
+		return javaToSqlArg(fieldType, Boolean.parseBoolean(defaultStr));
 	}
 
 	@Override
-	public Object javaToSqlArg(DbField dbField, Object obj) {
+	public Object javaToSqlArg(FieldType fieldType, Object obj) {
 		return ((Boolean) obj ? TRUE_VALUE : FALSE_VALUE);
 	}
 
 	@Override
-	public Object resultToSqlArg(DbField dbField, DatabaseResults results, int columnPos) throws SQLException {
+	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 		return results.getInt(columnPos);
 	}
 
 	@Override
-	public Object sqlArgToJava(DbField dbField, Object sqlArg, int columnPos) {
+	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {
 		return ((Integer) sqlArg == 0 ? Boolean.FALSE : Boolean.TRUE);
 	}
 
 	@Override
-	public Object resultStringToJava(DbField dbField, String stringValue, int columnPos) {
+	public Object resultStringToJava(FieldType fieldType, String stringValue, int columnPos) {
 		if (stringValue.length() == 0) {
 			return Boolean.FALSE;
 		} else {
-			return sqlArgToJava(dbField, Integer.parseInt(stringValue), columnPos);
+			return sqlArgToJava(fieldType, Integer.parseInt(stringValue), columnPos);
 		}
 	}
 }
