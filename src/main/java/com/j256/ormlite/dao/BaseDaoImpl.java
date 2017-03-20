@@ -151,12 +151,7 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 			throw new IllegalStateException("connectionSource is getting a null DatabaseType in "
 					+ getClass().getSimpleName());
 		}
-		if (tableConfig == null) {
-			tableInfo = new TableInfo<T, ID>(connectionSource, this, dataClass);
-		} else {
-			tableConfig.extractFieldTypes(connectionSource);
-			tableInfo = new TableInfo<T, ID>(databaseType, this, tableConfig);
-		}
+		tableInfo = createTableInfo();
 		statementExecutor = new StatementExecutor<T, ID>(databaseType, tableInfo, this);
 
 		/*
@@ -218,6 +213,17 @@ public abstract class BaseDaoImpl<T, ID> implements Dao<T, ID> {
 			daoConfigList.clear();
 			daoConfigLevelLocal.remove();
 		}
+	}
+
+	protected TableInfo<T, ID> createTableInfo() throws SQLException {
+		TableInfo<T, ID> tableInfo = null;
+		if (tableConfig == null) {
+			tableInfo = new TableInfo<T, ID>(connectionSource, this, dataClass);
+		} else {
+			tableConfig.extractFieldTypes(connectionSource);
+			tableInfo = new TableInfo<T, ID>(databaseType, this, tableConfig);
+		}
+		return tableInfo;
 	}
 
 	@Override

@@ -824,6 +824,12 @@ public interface Dao<T, ID> extends CloseableIterable<T> {
 	public void setObjectFactory(ObjectFactory<T> objectFactory);
 
 	/**
+	 * Get current object factory
+	 * @return current Dao object factory instance
+	 */
+	public ObjectFactory<T> getObjectFactory();
+
+	/**
 	 * Register an observer that will be called when data changes for this DAO. You mustq make a call to
 	 * {@link #unregisterObserver(DaoObserver)} to de-register the observer after you are done with it.
 	 */

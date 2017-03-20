@@ -892,6 +892,11 @@ public class RuntimeExceptionDao<T, ID> implements Dao<T, ID> {
 		dao.setObjectFactory(objectFactory);
 	}
 
+	@Override
+	public ObjectFactory<T> getObjectFactory() {
+		return dao.getObjectFactory();
+	}
+
 	/**
 	 * @see Dao#getRawRowMapper()
 	 */

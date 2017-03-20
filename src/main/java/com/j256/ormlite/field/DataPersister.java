@@ -47,8 +47,9 @@ public interface DataPersister extends FieldConverter {
 
 	/**
 	 * Return true if the field is appropriate for this persister otherwise false.
+	 * @param fieldType
 	 */
-	public boolean isValidForField(Field field);
+	public boolean isValidForField(Class<?> fieldType);
 
 	/**
 	 * Return the class most associated with this persister or null if none.

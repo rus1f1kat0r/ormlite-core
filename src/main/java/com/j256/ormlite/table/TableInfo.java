@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.j256.ormlite.dao.BaseDaoImpl;
+import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.field.DatabaseField;
@@ -29,7 +30,7 @@ public class TableInfo<T, ID> {
 
 	private static final FieldType[] NO_FOREIGN_COLLECTIONS = new FieldType[0];
 
-	private final BaseDaoImpl<T, ID> baseDaoImpl;
+	private final Dao<T, ID> baseDaoImpl;
 	private final Class<T> dataClass;
 	private final String tableName;
 	private final FieldType[] fieldTypes;
@@ -49,7 +50,7 @@ public class TableInfo<T, ID> {
 	 * @param dataClass
 	 *            Class that we are holding information about.
 	 */
-	public TableInfo(ConnectionSource connectionSource, BaseDaoImpl<T, ID> baseDaoImpl, Class<T> dataClass)
+	public TableInfo(ConnectionSource connectionSource, Dao<T, ID> baseDaoImpl, Class<T> dataClass)
 			throws SQLException {
 		this(connectionSource.getDatabaseType(), baseDaoImpl,
 				DatabaseTableConfig.fromClass(connectionSource, dataClass));
@@ -65,7 +66,7 @@ public class TableInfo<T, ID> {
 	 * @param tableConfig
 	 *            Configuration for our table.
 	 */
-	public TableInfo(DatabaseType databaseType, BaseDaoImpl<T, ID> baseDaoImpl, DatabaseTableConfig<T> tableConfig)
+	public TableInfo(DatabaseType databaseType, Dao<T, ID> baseDaoImpl, DatabaseTableConfig<T> tableConfig)
 			throws SQLException {
 		this.baseDaoImpl = baseDaoImpl;
 		this.dataClass = tableConfig.getDataClass();
@@ -241,7 +242,7 @@ public class TableInfo<T, ID> {
 		return false;
 	}
 
-	private static <T, ID> void wireNewInstance(BaseDaoImpl<T, ID> baseDaoImpl, T instance) {
+	private static <T, ID> void wireNewInstance(Dao<T, ID> baseDaoImpl, T instance) {
 		if (instance instanceof BaseDaoEnabled) {
 			@SuppressWarnings("unchecked")
 			BaseDaoEnabled<T, ID> daoEnabled = (BaseDaoEnabled<T, ID>) instance;

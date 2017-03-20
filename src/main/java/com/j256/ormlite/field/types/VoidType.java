@@ -1,7 +1,5 @@
 package com.j256.ormlite.field.types;
 
-import java.lang.reflect.Field;
-
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.support.DatabaseResults;
 
@@ -27,7 +25,7 @@ public class VoidType extends BaseDataType {
 	}
 
 	@Override
-	public boolean isValidForField(Field field) {
+	public boolean isValidForField(Class<?> fieldType) {
 		return false;
 	}
 }

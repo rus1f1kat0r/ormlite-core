@@ -116,7 +116,7 @@ public class JavaxPersistenceImpl implements JavaxPersistenceConfigurer {
 			config.setVersion(true);
 		}
 		if (config.getDataPersister() == null) {
-			config.setDataPersister(DataPersisterManager.lookupForField(field));
+			config.setDataPersister(DataPersisterManager.lookupForField(field.getType()));
 		}
 		config.setUseGetSet(DatabaseFieldConfig.findGetMethod(field, false) != null
 				&& DatabaseFieldConfig.findSetMethod(field, false) != null);

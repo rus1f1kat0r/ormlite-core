@@ -1,6 +1,5 @@
 package com.j256.ormlite.field.types;
 
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -49,7 +48,7 @@ public class SqlDateStringType extends DateStringType {
 	}
 
 	@Override
-	public boolean isValidForField(Field field) {
-		return (field.getType() == java.sql.Date.class);
+	public boolean isValidForField(Class<?> fieldType) {
+		return (fieldType == java.sql.Date.class);
 	}
 }

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 
 import org.junit.Test;
@@ -131,7 +130,7 @@ public class DataPersisterManagerTest extends BaseCoreTest {
 			return null;
 		}
 		@Override
-		public boolean isValidForField(Field field) {
+		public boolean isValidForField(Class<?> fieldType) {
 			return false;
 		}
 	}
@@ -167,8 +166,8 @@ public class DataPersisterManagerTest extends BaseCoreTest {
 			}
 		}
 		@Override
-		public boolean isValidForField(Field field) {
-			return field.getType() == StoredClass.class;
+		public boolean isValidForField(Class<?> fieldType) {
+			return fieldType == StoredClass.class;
 		}
 	}
 
@@ -215,9 +214,9 @@ public class DataPersisterManagerTest extends BaseCoreTest {
 			}
 		}
 		@Override
-		public boolean isValidForField(Field field) {
+		public boolean isValidForField(Class<?> fieldType) {
 			// this matches all enums
-			return field.getType().isEnum();
+			return fieldType.isEnum();
 		}
 	}
 }

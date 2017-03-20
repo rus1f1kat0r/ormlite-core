@@ -36,17 +36,17 @@ public class BaseDatabaseTypeTest extends BaseCoreTest {
 
 	@Test
 	public void testUnknownClass() throws Exception {
-		assertNull(DataPersisterManager.lookupForField(SomeFields.class.getDeclaredField("someFields")));
+		assertNull(DataPersisterManager.lookupForField(SomeFields.class.getDeclaredField("someFields").getType()));
 	}
 
 	@Test
 	public void testSerializableClass() throws Exception {
-		assertNull(DataPersisterManager.lookupForField(SomeFields.class.getDeclaredField("serializable")));
+		assertNull(DataPersisterManager.lookupForField(SomeFields.class.getDeclaredField("serializable").getType()));
 	}
 
 	@Test
 	public void testClassLookupByteArray() throws Exception {
-		assertNull(DataPersisterManager.lookupForField(SomeFields.class.getDeclaredField("byteArray")));
+		assertNull(DataPersisterManager.lookupForField(SomeFields.class.getDeclaredField("byteArray").getType()));
 	}
 
 	@Test

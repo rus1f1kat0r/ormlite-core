@@ -1,6 +1,5 @@
 package com.j256.ormlite.field.types;
 
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 
 import com.j256.ormlite.field.BaseFieldConverter;
@@ -57,13 +56,13 @@ public abstract class BaseDataType extends BaseFieldConverter implements DataPer
 	}
 
 	@Override
-	public boolean isValidForField(Field field) {
+	public boolean isValidForField(Class<?> fieldType) {
 		if (classes.length == 0) {
 			// we can't figure out the types so we just say it is valid
 			return true;
 		}
 		for (Class<?> clazz : classes) {
-			if (clazz.isAssignableFrom(field.getType())) {
+			if (clazz.isAssignableFrom(fieldType)) {
 				return true;
 			}
 		}

@@ -52,7 +52,7 @@ public abstract class BaseTypeTest extends BaseCoreTest {
 			if (classes.length > 0) {
 				assertTrue(classes[0].isAssignableFrom(fieldType.getType()));
 			}
-			assertTrue(fieldType.getDataPersister().isValidForField(field));
+			assertTrue(fieldType.getDataPersister().isValidForField(field.getType()));
 			if (javaVal instanceof byte[]) {
 				assertTrue(Arrays.equals((byte[]) javaVal,
 						(byte[]) dataPersister.resultToJava(fieldType, results, colNum)));

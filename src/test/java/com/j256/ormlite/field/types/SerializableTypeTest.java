@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -223,8 +222,8 @@ public class SerializableTypeTest extends BaseTypeTest {
 		}
 
 		@Override
-		public boolean isValidForField(Field field) {
-			return Collection.class.isAssignableFrom(field.getType());
+		public boolean isValidForField(Class<?> fieldType) {
+			return Collection.class.isAssignableFrom(fieldType);
 		}
 	}
 }
